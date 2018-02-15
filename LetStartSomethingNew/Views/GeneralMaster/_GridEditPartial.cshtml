@@ -1,0 +1,36 @@
+﻿@model  LetStartSomethingNew.Models.GeneralMaster.RoomType
+
+
+@if(Model.Action == "Edit")
+{
+    using (Ajax.BeginForm("RoomTypeAction", "GeneralMaster",null, new AjaxOptions
+    { UpdateTargetId = "result" },new { }))
+    {
+        <div class="form-group">
+            <label for="">Room Name</label>
+            @Html.TextBoxFor(x => x.RoomTypeName, new { @class = "form-control" })
+            @Html.HiddenFor(m=>m.Action, new { @class = "form-control" })
+            @Html.HiddenFor(m => m.Pid, new { @class = "form-control" })
+        </div>
+        <button type="submit" class="btn btn-default">Update</button>
+    }
+}
+
+@if (Model.Action == "Delete")
+{
+    using (Ajax.BeginForm("RoomTypeAction", "GeneralMaster", new AjaxOptions
+    { UpdateTargetId = "result" },new {@value="Delete"}))
+    {
+        <div class="form-group">
+            <label for="">Room Name</label>
+            @Html.TextBoxFor(x => x.RoomTypeName, new { @class = "form-control",@readonly="readonly" })
+        </div>
+        <button type="submit" class="btn btn-default">Delete</button>
+    }
+}
+
+
+<div id="result"></div>
+
+
+

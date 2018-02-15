@@ -1,0 +1,30 @@
+﻿@model LetStartSomethingNew.Models.GeneralMaster.GeneralMaster.DiscountType
+
+@{
+    ViewBag.Title = "EditDiscountType";
+}
+
+<h2>EditDiscountType</h2>
+
+@using (Html.BeginForm("EditDiscountType", "GeneralMaster", FormMethod.Post))
+{
+
+
+        @Html.HiddenFor(m=>m.Pid)
+        @Html.HiddenFor(m=>m.NotesXid)
+
+        @Html.Label("DiscountType")
+        @Html.TextBoxFor(m=>m.DiscountTypeName)
+        @Html.ValidationMessageFor(m => m.DiscountTypeName, "", new { @class = "text-danger" })
+
+        @Html.Label("Sequence")
+        @Html.TextBoxFor(m => m.Sequence)
+        @Html.ValidationMessageFor(m => m.Sequence, "", new { @class = "text-danger" })
+
+        @Html.Label("Description")
+        @Html.TextBoxFor(m => m.NotesDescription)
+
+        <input type="submit" value="Edit" id="Edit" class="btn btn-success btn-lg" />
+        <input type="button" value="Clear" id="Clear" class="btn btn-success btn-lg" />
+
+}

@@ -1,0 +1,42 @@
+﻿@model MyMasterClasses.Passport
+@{
+    ViewBag.Title = "LoginPage";
+}
+
+<h2>LoginPage</h2>
+        
+    Hello Login Page
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+
+<div>
+
+    @using(Html.BeginForm("Home","Login",FormMethod.Post))
+    { 
+   @*@Html.Label("Login")
+    @Html.TextBox("txtLoginName", null, new { @class = "form-control" })*@
+
+        @Html.LabelFor(m=>m.LoginName)
+        @Html.TextBoxFor(m=>m.LoginName,new  {@class = "form-control" })
+        @Html.ValidationMessageFor(m => m.LoginName)
+
+    <br />
+
+    @*@Html.Label("Password")
+    @Html.TextBox("txtPassword", null, new { @class = "form-control" })*@
+        @Html.LabelFor(m => m.Password)
+        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Password)
+
+
+    <br />
+
+    <input type="submit" id="btnSubmit" value="Submit" />
+    }
+</div>
+
+
+
+
+

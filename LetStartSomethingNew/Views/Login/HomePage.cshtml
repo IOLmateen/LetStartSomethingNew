@@ -1,0 +1,84 @@
+﻿@model LetStartSomethingNew.Models.Login
+@{
+    ViewBag.Title = "HomePage";
+    
+}
+
+<h2>HomePage</h2>
+Welcome 
+Your Login is
+
+@Html.LabelFor(m=>m.objPassport.LoginName)
+@Html.DisplayFor(m=>m.objPassport.LoginName)
+
+Your Password is 
+
+@Html.LabelFor(m=>m.objPassport.Password)
+@Html.DisplayFor(m=>m.objPassport.Password)
+
+
+Do you want to @Html.ActionLink("Logout?", "Logout", "Login")
+
+<br/>
+    @foreach (var item in Model.objUserGroupRights.ListUserGroupRights)
+    {
+    <div>
+        <a class="Hello" href="javascript:checkrights('@Html.DisplayFor(m=>item.PageName)','@Html.DisplayFor(m=>item.LinkName)','@Html.DisplayFor(m => item.RightHeader)')">@Html.DisplayFor(m => item.RightHeader)</a>
+    </div>
+    }
+
+<body>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        function checkrights(pagename, linkname, rightheader) {
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("CheckUserGroupRights")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "JSON",
+                data: '{pagename: "' + pagename + '" ,linkname: "' + linkname + '",rightheader: "' + rightheader + '"   }',
+                success:
+                function (data) {
+                    //if (rightheader == "DiscountType")
+                        //window.location.href = '@Url.Action("ViewDetails", "GeneralMaster",new {@Link="DiscountType",@Mode="Get"})';
+                        //window.location.href = '@Url.Action("ViewDetails", "GeneralMaster",new {@Link="Index",@Mode="Get"})';
+                    if (data == "YES") {
+                       // hiMateen(pagename);
+                        alert("You Have rights");
+                        switch (rightheader) {
+                            case "DiscountType": window.location.href = '@Url.Action("DisplayDiscountType", "GeneralMaster")';
+                                break;
+
+                            case "RoomType": window.location.href = '@Url.Action("DisplayRoomType", "GeneralMaster")';
+                                break;
+
+                            case "Airport": window.location.href = '@Url.Action("DisplayAirport", "GeneralMaster")';
+                                break;
+
+                             case "HumanResource": window.location.href = '@Url.Action("DisplayHumanResource", "GeneralMaster")';
+                                break;
+                        }
+                    }
+                    else { alert("You do not have rights---No Data");}
+
+                },
+                error: onerror
+            });
+            @*function Onsuccess()
+            {
+                alert("Hi");
+                window.location.href = '@Url.Action("DiscountType", "GeneralMaster",new {@Link="DiscountType",@Mode="Get"})';
+            }*@
+            function onerror()
+            {
+                alert("You do not have rights---Error");
+            }
+        }
+
+        function hiMateen(data)
+        {
+            alert(data);
+         }
+    </script>
+</body>

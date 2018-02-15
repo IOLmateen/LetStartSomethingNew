@@ -1,0 +1,296 @@
+﻿@model LetStartSomethingNew.Models.GeneralMaster.GeneralMaster.DiscountType
+@{
+    ViewBag.Title = "DisplayDiscountType";
+}
+
+<h2>DisplayDiscountType</h2>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<style>
+     .ui-autocomplete {
+         max-height: 100px;
+         overflow-y: auto;
+         overflow-x: hidden;
+     }
+     
+     * html .ui-autocomplete {
+         height: 100px;
+     }
+</style>
+
+<script>
+    $(function () {
+        var pidvalue = 0;
+        $("#SearchDiscount").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/GeneralMaster/SearchDiscountTypeByString",
+                    type: "POST",
+                    dataType: "json",
+                    data: { prefix: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            pidvalue = item.Pid;
+                            return { value: item.DiscountTypeName, label: item.DiscountTypeName };
+                        }))
+                    }, error: function (response) {
+                        alert(response.responseText);
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    }
+                })
+            },
+            select: function (e, i) {
+                $("#Pid").val(pidvalue);
+            },
+            minLength: 3,
+            messages: {
+                noResults: "", results: function (resultsCount) { }
+            }
+        }); 
+     });
+
+</script>
+    //USING FORMCOLLECTION AND PASSING MODELS
+    
+    @using (Html.BeginForm("DisplayDiscountType", "GeneralMaster", FormMethod.Post,new { }))
+{@Html.AntiForgeryToken()
+<table>
+    <thead>Search Discount</thead>
+    <tbody>
+        <tr>
+          @Html.TextBox("SearchDiscount")
+          @Html.HiddenFor(m => m.Pid)  
+        </tr>
+        <tr>
+            <input type="submit" value="Search" id="Search"   class="btn btn-success btn-lg" />
+        </tr>
+    </tbody>
+</table>
+}
+@Html.ActionLink("ShowAll", "DisplayDiscountType", "GeneralMaster", new { },new {@class="btn btn-success btn-lg",@id= "ShowAll" })
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#Search").click(function () {
+            if ($("#SearchDiscount").val() == "")
+            {
+                alert("Please Select a value before Search");
+                return false;
+            }
+        });
+        $("#ShowAll").click(function () {
+            if ($("#SearchDiscount").val() != "") {
+                alert("Please do not enter a value for search");
+                return false;
+            }
+        });
+    });
+</script>
+
+
+@*<script type="text/javascript">
+    $(function () {
+        $("#Search").click(function () {
+            $.ajax({
+                type: "POST",
+                dataType:"json",
+                url: "GeneralMaster/SearchDiscount",
+                data: { pid: m => m.pid },
+                contentType: "application/json; charset=utf-8",
+                success: function (response)
+                {
+                    alert(response.pid);
+                },
+                failure: function (response)
+                {
+                    alert(response.responseText);
+
+                },
+                error: function (response)
+                {
+                    alert(response.responseText);
+                }
+            });
+        });
+    });
+</script>*@
+
+
+ @foreach (var item in Model.Usergrouprights.ListUserGroupRights)
+    {
+<div>
+    <a class="Hello" href="javascript:checkrights('@Html.DisplayFor(m=>item.PageName)','@Html.DisplayFor(m=>item.LinkName)','@Html.DisplayFor(m => item.RightHeader)')">@Html.DisplayFor(m => item.RightHeader)</a>
+</div>
+    }
+
+@Html.ActionLink("Add","ActionDiscountType", "GeneralMaster", new { }, new { })
+@Html.ActionLink("Edit", "EditDiscountType", "GeneralMaster", new { pid = "xxx" }, new {id="lnkEdit"})
+@Html.ActionLink("Delete", "DeleteDiscountType", "GeneralMaster", new {}, new { })
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+
+<script type="text/javascript">
+        function checkrights(pagename, linkname, rightheader) {
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("CheckUserGroupRights")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "JSON",
+                data: '{pagename: "' + pagename + '" ,linkname: "' + linkname + '",rightheader: "' + rightheader + '"   }',
+                success:
+                function (data) {
+                     if (data == "YES") {
+                        alert("You Have rights");
+                        switch (rightheader) {
+                            case "ActionDiscountType": window.location.href = '@Url.Action("ActionDiscountType", "GeneralMaster")';
+                                break;
+
+                            case "EditDiscountType": window.location.href = '@Url.Action("EditDiscountType", "GeneralMaster")';
+                                break;
+
+                            case "DeleteDiscountType": window.location.href = '@Url.Action("DeleteDiscountType", "GeneralMaster")';
+                                break;
+                        }
+                    }
+                    else { alert("You do not have rights---No Data");}
+                },
+                error: onerror
+            });
+            @*function Onsuccess()
+            {
+                alert("Hi");
+                window.location.href = '@Url.Action("DiscountType", "GeneralMaster",new {@Link="DiscountType",@Mode="Get"})';
+            }*@
+            function onerror()
+            {
+                alert("You do not have rights---Error");
+            }
+        }
+</script>
+
+@using (Html.BeginForm("DisplayDiscountType", "GeneralMaster", FormMethod.Post))
+{ @Html.AntiForgeryToken()
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Sequence</th>
+            <th>LastEdit</th>
+        </tr>
+    </thead>
+    <tbody>
+            @for (int i = 0; i < Model.listDiscountType.Count; i++)
+            {
+                <tr>
+                    @if (i == 0)
+                    {
+                    <td>@Html.RadioButton("rbtPid", Model.listDiscountType[i].Pid, true, new { @checked = "checked" })</td>
+                    }
+                    else
+                    {
+                    <td>@Html.RadioButton("rbtPid", Model.listDiscountType[i].Pid, false)</td>
+                    }
+                    <td>@Html.DisplayFor(m => m.listDiscountType[i].DiscountTypeName)</td>
+                    <td>@Html.DisplayFor(m => m.listDiscountType[i].Sequence)</td>
+                    <td>@Html.DisplayFor(m => m.listDiscountType[i].LastEdit)</td>                    
+                </tr>
+            }
+    </tbody>
+</table>
+
+<table cellpadding="0" cellspacing="0">
+    <tr>
+        @for (int i = 1; i <= Model.PagingValues.PageCount; i++)
+        {
+            <td>
+                @if (i != Model.PagingValues.CurrentPageIndex)
+                {
+                    <a href="javascript:PagerClick(@i);">@i</a>
+                }
+                else
+                {
+                    <span>@i</span>
+                }
+            </td>
+        }
+    </tr>
+</table>
+<input type="hidden" id="hfCurrentPageIndex" name="currentPageIndex" />
+}        
+<script type="text/javascript">
+    function PagerClick(index) {
+        document.getElementById("hfCurrentPageIndex").value = index;
+        alert(index);
+        document.forms[1].submit();
+    }
+</script>
+<script type="text/javascript">
+    function GetCurrIndex() {
+        document.getElementById("hfCurrentPageIndex").value = index;
+        alert(index);
+        return index;
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#lnkEdit").click(function () {
+            alert("lnkEdit");
+            var pid = $("#rbtPid").val();
+            alert(pid);
+            this.href = this.href.replace("xxx", pid);
+            alert(this.href);
+        });
+    });
+</script>
+
+
+
+@*@if (Model.ActionType == "Edit")
+    {
+        using (Html.BeginForm()) {
+        <table>
+            <thead>Edit View</thead>
+            <tbody>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Pid)</td><td>@Html.TextAreaFor(m=>m.Pid)</td>
+                    <td>@Html.LabelFor(m => m.DiscountTypeName)</td><td>@Html.TextAreaFor(m => m.DiscountTypeName)</td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.ActionLink("Edit", "GetById", "GeneralMaster", new { @id = Html.DisplayFor(m => m.Pid), @value = Model.ActionType })
+        }
+
+    }
+    @if (Model.ActionType == "Delete")
+    {
+        <table>
+            <thead>Delete View</thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        @Html.ActionLink("Delete", "GetById", "GeneralMaster", new { @id = Html.DisplayFor(m => m.Pid), @value = Model.ActionType })
+    }
+    @if (Model.ActionType == "Add")
+    {
+        <table>
+            <thead>Add View</thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    }*@

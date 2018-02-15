@@ -1,0 +1,51 @@
+﻿@model LetStartSomethingNew.Models.GeneralMaster.GeneralMaster.DiscountType
+@{
+    ViewBag.Title = "ActionDiscountType";
+}
+
+<h2>ActionDiscountType</h2>
+ <html>
+ <body>
+        @using (Html.BeginForm("ActionDiscountType", "GeneralMaster", FormMethod.Post))
+        {  @Html.AntiForgeryToken()
+            <table>
+                <thead>Add Discount</thead>
+                <tbody>
+                    <tr>
+                        <td>DiscountType</td>
+                        <td>@Html.TextBoxFor(m => m.DiscountTypeName)</td>
+                        @Html.ValidationMessageFor(m => m.DiscountTypeName, "", new { @class = "text-danger" })
+                    </tr>
+                    <tr>
+                        <td>Sequence</td>
+                        <td>@Html.TextBoxFor(m => m.Sequence)</td>
+                        @Html.ValidationMessageFor(m => m.Sequence, "", new { @class = "text-danger" })
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>@Html.TextAreaFor(m => m.NotesDescription, new { @name = "NotesName" })</td>
+                    </tr>
+
+                    <tr>
+                        <td><input type="submit" value="Add" id="Add" class="btn btn-success btn-lg" /></td>
+                        <td><input type="button" value="Clear" id="Clear" class="btn btn-success btn-lg" /></td>
+                    </tr>
+
+                </tbody>
+            </table>
+        }
+</body>
+
+<script type="text/javascript">
+    $("#Clear").click(function () {
+
+        $("#DiscountTypeName").val("");
+        $("#Sequence").val("");
+        $("#NotesValues.NotesName").val("");
+
+        alert("Clear Clicked");
+    });
+
+</script>
+</html>
+

@@ -1,0 +1,59 @@
+﻿
+@*@model LetStartSomethingNew.Models.GeneralMaster.DiscountType
+@{
+    ViewBag.Title = "ViewDiscountType";
+}
+<h2>ViewDiscountType</h2>
+
+@{
+    WebGrid grid = new WebGrid(null, rowsPerPage: @Model.PageSize);
+    grid.Bind(Model.listDiscountType, autoSortAndPage: true, rowCount: @Model.PageSize);
+}
+
+@grid.GetHtml(tableStyle: "table table-bordered",
+ mode: WebGridPagerModes.All,
+ firstText: "<< First",
+ previousText: "< Prev",
+ nextText: "Next >",
+ lastText: "Last >>",
+    columns: grid.Columns(
+    grid.Column("Pid", "Pid"),
+    grid.Column("DiscountTypeName", "DiscountType"),
+    grid.Column(header: "Action",
+                format: @<a data-value="@item.Pid" class="btnEdit" href="javascript:void(0)">Edit</a>)
+))
+
+<div id="dialog" title="edit view" style="overflow: hidden;"></div>
+<script src="https://code.jquery.com/ui/1.12.0-rc.2/jquery-ui.min.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js">
+
+</script>
+<script type="text/javascript">
+	    $(function () {
+	        var id = 0;
+	        $(document).on('click', '.btnEdit', function () {
+	            id = $(this).attr("data-value");
+	            $('#dialog').dialog('open');
+	        });
+
+	        $('#dialog').dialog({
+	            autoOpen: false,
+	            width: 400,
+	            resizable: false,
+	            title: 'Edit  details',
+	            modal: true,
+	            open: function (event, ui) {
+	                // Load partial view _GridEditPartial
+	                $(this).load("@Url.Action("GetById")", { id: id });
+	            },
+	            buttons: {
+	                "Close": function () {
+	                    $(this).dialog("close");
+	                }
+	            }
+	        });
+	    });
+</script>*@
+
+
+
