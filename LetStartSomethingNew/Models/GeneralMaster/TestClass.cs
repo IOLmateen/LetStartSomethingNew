@@ -152,7 +152,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             if(objDiscountType.NotesXid != 0)
             { 
-                objDiscountType.NotesDescription = GetNotesById(objDiscountType.NotesXid);
+                objDiscountType.NotesDescription = GetNotesById(objDiscountType.NotesXid.GetValueOrDefault(-1));
             }
             return objDiscountType;
         }
@@ -162,18 +162,18 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         }
 
         //GETDelete Discount
-        public GeneralMaster.DiscountType DDiscountType(int id,int notesxid)
+        public GeneralMaster.DiscountType DDiscountType(int id)
         {
             GeneralMaster.DiscountType objDiscountType = new GeneralMaster.DiscountType();
             objBaseDataLayer.getDALGetDiscountTypeById(id,"D");
-            string s =DeleteNotesById(notesxid);
+            //string s =DeleteNotesById(notesxid);
 
             return objDiscountType;
         }
-        private string DeleteNotesById(int NotesXid)
-        {
-            return objBaseDataLayer.getDALGetNotesById(NotesXid,"D");
-        }
+        //private string DeleteNotesById(int NotesXid)
+        //{
+        //    return objBaseDataLayer.getDALGetNotesById(NotesXid,"D");
+        //}
 
         //POSTEDIT Discount
         public GeneralMaster.DiscountType EDiscountType(GeneralMaster.DiscountType model)
@@ -191,11 +191,11 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             if (model.NotesDescription != null)
             {
                 objDiscountType.NotesDescription = objNotes.NotesName = model.NotesDescription;
-                objNotes.Pid = model.NotesXid;
+                objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
                 objDiscountType.NotesXid = NotesChanges(objNotes.Pid, objDiscountType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid,"E");
             }
 
-            objBaseDataLayer.getDALInsertModifyDiscountType(objDiscountType.Pid,objDiscountType.DiscountTypeName, objDiscountType.Sequence, objDiscountType.NotesXid,
+            objBaseDataLayer.getDALInsertModifyDiscountType(objDiscountType.Pid,objDiscountType.DiscountTypeName, objDiscountType.Sequence, objDiscountType.NotesXid.GetValueOrDefault(-1),
                                                       objDiscountType.LastEditByXid, objDiscountType.Companyxid,"E");
 
             return objDiscountType;
@@ -220,7 +220,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
                 objDiscountType.NotesXid = NotesChanges(objNotes.Pid ,objDiscountType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid,"A");
             }
 
-            objBaseDataLayer.getDALInsertModifyDiscountType(objDiscountType.Pid,objDiscountType.DiscountTypeName, objDiscountType.Sequence, objDiscountType.NotesXid,
+            objBaseDataLayer.getDALInsertModifyDiscountType(objDiscountType.Pid,objDiscountType.DiscountTypeName, objDiscountType.Sequence, objDiscountType.NotesXid.GetValueOrDefault(-1),
                                                       objDiscountType.LastEditByXid, objDiscountType.Companyxid,"A");
 
             return objDiscountType;

@@ -118,17 +118,12 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
             return t.DisplayDiscountType(currPage, SearchPid);
         }
 
-
-
-
         [HttpPost]
         public JsonResult SearchDiscountTypeByString(string prefix)
         {
             TestClass t = new TestClass();
             return Json(t.SearchDiscountType(prefix), JsonRequestBehavior.AllowGet);
         }
-
-        //  [ValidateAntiForgeryTokenWrapper(HttpVerbs.Post)]
 
         //GET ADDDISCOUNT
         [HttpGet]
@@ -208,15 +203,16 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
 
         //GET DeeleteDISCOUNT
         [HttpGet]
-        public ActionResult DeleteDiscountType(int pid,int notesxid)
+        public ActionResult DeleteDiscountType(int pid)
         {
-            return View(this.DDiscountType(pid, notesxid));
+            this.DDiscountType(pid);
+            return RedirectToAction("DisplayDiscountType");
         }
         //GET DeeleteDISCOUNT
-        private GeneralMaster.DiscountType DDiscountType(int pid,int notesxid)
+        private GeneralMaster.DiscountType DDiscountType(int pid)
         {
             TestClass t = new TestClass();
-            return t.DDiscountType(pid, notesxid);
+            return t.DDiscountType(pid);
         }
 
 

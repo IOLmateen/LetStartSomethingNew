@@ -63,7 +63,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int Pid { get; set; }
             [Required(ErrorMessage = "DiscountTypeName is required")]
             public string DiscountTypeName { get; set; }
-            public int NotesXid { get; set; }
+            public Nullable<int> NotesXid { get; set; }
             public DateTime LastEdit { get; set; }
             public int LastEditByXid { get; set; }
             public int Companyxid { get; set; }

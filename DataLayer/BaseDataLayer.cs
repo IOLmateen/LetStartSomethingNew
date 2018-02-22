@@ -266,7 +266,7 @@ namespace DataLayer
         public DataTable getDALGetDiscountTypeById(int id,string action)
         {
             SqlDataReader reader = null;
-            DataTable dtgetDiscountTypeById = new DataTable();
+            DataTable dtgetDiscountTypeById=new DataTable();
 
             using (SqlConnection sCon = new SqlConnection(connectionString))
             {

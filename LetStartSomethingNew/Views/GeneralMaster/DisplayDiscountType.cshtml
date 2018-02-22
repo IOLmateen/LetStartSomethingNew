@@ -4,9 +4,7 @@
 }
 
 <h2>DisplayDiscountType</h2>
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 <style>
      .ui-autocomplete {
          max-height: 100px;
@@ -123,23 +121,26 @@
  @foreach (var item in Model.Usergrouprights.ListUserGroupRights)
     {
 <div>
-    <a class="Hello" href="javascript:checkrights('@Html.DisplayFor(m=>item.PageName)','@Html.DisplayFor(m=>item.LinkName)','@Html.DisplayFor(m => item.RightHeader)')">@Html.DisplayFor(m => item.RightHeader)</a>
+    <a class="@Html.DisplayFor(m=>item.LinkName)" href="javascript:checkrights('@Html.DisplayFor(m=>item.PageName)','@Html.DisplayFor(m=>item.LinkName)','@Html.DisplayFor(m => item.RightHeader)')">@Html.DisplayFor(m => item.RightHeader)</a>
 </div>
     }
 
 
-kajsndjkasjdkjasldlsajdlkasjkd
-
-
-djksahdjkahskjdhksajdhasjkdhhsajkdh
-
-@Html.ActionLink("Add","ActionDiscountType", "GeneralMaster", new { }, new { })
+@*@Html.ActionLink("Add","ActionDiscountType", "GeneralMaster", new { }, new { })
 @Html.ActionLink("Edit", "EditDiscountType", "GeneralMaster", new { pid = "xxx" }, new {id="lnkEdit"})
-@Html.ActionLink("Delete", "DeleteDiscountType", "GeneralMaster", new {}, new { })
+@Html.ActionLink("Delete", "DeleteDiscountType", "GeneralMaster", new {}, new { })*@
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
 <script type="text/javascript">
         function checkrights(pagename, linkname, rightheader) {
+            alert("CheckUserRights");
+            var pid = getMyPid();
+            if (pid == false)
+            {
+                alert("Pid is false");
+                return false;
+            }
+
 
             $.ajax({
                 type: "POST",
@@ -155,11 +156,13 @@ djksahdjkahskjdhksajdhasjkdhhsajkdh
                             case "ActionDiscountType": window.location.href = '@Url.Action("ActionDiscountType", "GeneralMaster")';
                                 break;
 
-                            case "EditDiscountType": window.location.href = '@Url.Action("EditDiscountType", "GeneralMaster")';
+                            case "EditDiscountType": window.location.href = '@Url.Action("EditDiscountType", "GeneralMaster",new {pid="xxx"})'.replace("xxx",pid);
                                 break;
 
-                            case "DeleteDiscountType": window.location.href = '@Url.Action("DeleteDiscountType", "GeneralMaster")';
-                                break;
+                            case "DeleteDiscountType": var url = '@Url.Action("DeleteDiscountType", "GeneralMaster")';
+                                                           url += '?pid=' + pid ; 
+                                                           window.location.href = url; 
+                                                           break;
                         }
                     }
                     else { alert("You do not have rights---No Data");}
@@ -203,7 +206,8 @@ djksahdjkahskjdhksajdhasjkdhhsajkdh
                     }
                     <td>@Html.DisplayFor(m => m.listDiscountType[i].DiscountTypeName)</td>
                     <td>@Html.DisplayFor(m => m.listDiscountType[i].Sequence)</td>
-                    <td>@Html.DisplayFor(m => m.listDiscountType[i].LastEdit)</td>                    
+                    <td>@Html.DisplayFor(m => m.listDiscountType[i].LastEdit)</td>  
+                     @Html.HiddenFor(m => m.listDiscountType[i].NotesXid)
                 </tr>
             }
     </tbody>
@@ -244,15 +248,10 @@ djksahdjkahskjdhksajdhasjkdhhsajkdh
 </script>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        $("#lnkEdit").click(function () {
-            alert("lnkEdit");
-            var pid = $("#rbtPid").val();
-            alert(pid);
-            this.href = this.href.replace("xxx", pid);
-            alert(this.href);
-        });
-    });
+    function getMyPid() {
+        if ($("input[name='rbtPid']:checked").length > 0) {return $("input[name='rbtPid']:checked").val();}
+        else {return false;}
+    }
 </script>
 
 
