@@ -1,30 +1,84 @@
 ﻿
+
+
+
+Tables
+
+select * from UserGroupRights1_Mateen
+
 Pid	UserGroupXid	ModuleXid	PageName	LinkName	RightHeader	AllowYN	NotesXid	LastEdit	LastEditByXid	CompanyXid
 1	90	1	DisplayDiscountType	View	DiscountType	Y	NULL	2018-01-03 14:47:55.643	733	2
 2	90	1	DisplayRoomType	View	RoomType	Y	NULL	2018-01-11 13:22:54.027	733	2
 3	90	1	DisplayAirport	View	Airport	Y	NULL	2018-01-13 08:10:58.483	733	2
 4	90	1	DisplayHumanResource	View	HumanResource	Y	NULL	2018-01-20 13:48:44.243	733	2
-5	90	1	DisplayDiscountType	Add	Add DiscountType	Y	NULL	2018-02-14 08:57:19.107	733	2
-6	90	1	DisplayDiscountType	Update	Update DiscountType	Y	NULL	2018-02-14 08:57:19.110	733	2
-7	90	1	DisplayDiscountType	Delete	Delete DiscountType	Y	NULL	2018-02-14 08:57:19.117	733	2
+5	90	1	DisplayDiscountType	Add	ActionDiscountType	Y	NULL	2018-02-14 08:57:19.107	733	2
+6	90	1	DisplayDiscountType	Edit	EditDiscountType	Y	NULL	2018-02-14 08:57:19.110	733	2
+7	90	1	DisplayDiscountType	Delete	DeleteDiscountType	Y	NULL	2018-02-14 08:57:19.117	733	2
+
+
+
+proc used
+
+sp_helptext Usp_GetDiscountTypeById_Mateen
+sp_helptext Usp_GetMaster_Mateen
+sp_helptext Usp_GetNotesById_Mateen
+sp_helptext Usp_InsertModifyDiscountType_Mateen
+sp_helptext Usp_NotesChanges_Mateen
+
+
+Text
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE procedure Usp_GetDiscountTypeById_Mateen
+(
+@li_pid int,
+@lv_action varchar(1)
+)
+as
+Declare 
+@NotesXid int
+Begin
+	if (@lv_action = 'E')
+		begin
+			Select DiscountType,Sequence,LastEditbyXid,Companyxid,isnull(NotesXid,-1) as NotesXid
+			from M_DiscountType
+			Where pid = @li_pid
+		end
+	if (@lv_action = 'D')
+		begin
+		Select @NotesXid=NotesXid
+			from M_DiscountType
+			Where pid = @li_pid
+		
+			if (@NotesXid != null or @NotesXid != -1)
+				begin
+				Delete from M_Notes where pid = @NotesXid
+				end
+
+			Delete from M_DiscountType
+			Where pid = @li_pid
+		end
+End
 
 Text
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE Procedure Usp_GetMaster_Mateen
 (
 	@lv_KeyName varchar(20),
-	@li_Pid int		
-
+	@li_SearchPid int	
 )
 As
 Begin
 	if (@lv_KeyName = 'DiscountType')
-	Begin
-		if(@li_Pid = 0 )
-			Select  Pid,DiscountType,Sequence,lastEdit from M_DiscountType 
-		else
-			Select  Pid,DiscountType,Sequence,lastEdit from M_DiscountType where pid = @li_Pid		
-	End
+		Begin
+			if(@li_SearchPid = 0)
+			Begin
+				Select  Pid,DiscountType,Sequence,lastEdit from M_DiscountType 
+			End
+			if (@li_SearchPid > 0)
+			Begin
+				Select  Pid,DiscountType,Sequence,lastEdit from M_DiscountType where pid = @li_SearchPid
+			End
+		End
 	
 	if(@lv_KeyName = 'HumanResource')
 	Begin
@@ -198,9 +252,41 @@ Begin
 
 
 End
------------------------------------------------------------------------------
 
-Alter Procedure Usp_InsertDiscountType_Mateen
+
+
+
+
+
+
+Text
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE procedure Usp_GetNotesById_Mateen
+(
+@li_pid int,
+@lv_action varchar(1)
+)
+as
+
+Begin
+Declare
+@NotesDesc varchar(200)
+
+	if(@lv_action = 'E')
+		Begin
+			Select @NotesDesc=Notes
+			from M_Notes
+			Where pid = @li_pid
+
+			select @NotesDesc
+		End
+
+
+End
+
+Text
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE Procedure Usp_InsertModifyDiscountType_Mateen
 (
 	@li_Pid int,
 	@lv_DiscountTypeName varchar(20),
@@ -208,7 +294,7 @@ Alter Procedure Usp_InsertDiscountType_Mateen
 	@li_NotesXid int,
 	@li_LastEditByXid int,
 	@li_Companyxid int,
-	@lc_Action char(1)
+	@lc_Action varchar(1)
 )
 as
 Begin
@@ -237,36 +323,43 @@ Begin
 End
 
 
-
-
---------------------------------------------------
-create procedure Usp_GetDiscountTypeById_Mateen
+Text
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE Procedure Usp_NotesChanges_Mateen
 (
-@li_pid int
+@li_pid int,
+@lv_notes varchar(16),
+@li_lastedit int,
+@li_companyxid int,
+@lc_action varchar(1)
 )
-as
+As
 Begin
 
-	Select DiscountType,Sequence,LastEditbyXid,Companyxid,NotesXid
-	from M_DiscountType
-	Where pid = @li_pid
+Declare 
+@li_maxpid int 
 
+	if (@lc_action = 'A')
+	 begin
+		Insert Into M_Notes (Notes,EntityType,EntityXid,LastEdit,LastEditByXid,CompanyXid,HTMLYN,privateyn) 
+					 values (@lv_notes,null,null,getdate(),@li_lastedit,@li_companyxid,null,null)
+		select @li_maxpid = max(pid) from m_notes
+		select @li_maxpid as pid
+	 end
+
+	if (@lc_action = 'E')
+	 begin
+		Update M_Notes
+		set Notes = @lv_notes,
+			LastEdit = getdate(),
+			LastEditByXid = @li_lastedit,
+			CompanyXid = @li_companyxid	
+		where pid = @li_pid
+		select @li_pid as pid
+	 end
 End
 
----------------------------------------------------
 
-create procedure Usp_GetNotesById_Mateen
-(
-@li_pid int
-)
-as
 
-Begin
-Declare
-@NotesDesc varchar(200)
 
-	Select @NotesDesc=Notes
-	from M_Notes
-	Where pid = @li_pid
 
-End
