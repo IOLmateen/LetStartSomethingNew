@@ -41,6 +41,8 @@
             alert("Pid is false");
             return false;
         }
+
+
         $.ajax({
             type: "POST",
             url: "CheckUserGroupRights",//'@Url.Action("CheckUserGroupRights")',
