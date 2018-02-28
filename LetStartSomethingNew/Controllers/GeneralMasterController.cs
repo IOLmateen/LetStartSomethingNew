@@ -889,7 +889,7 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
         [HttpGet]
         public ActionResult EditBank(int pid)
         {
-            return View(this.EBank/(pid));
+            return View(this.EBank(pid));
         }
         //GET EDITDISCOUNT
         private GeneralMaster.Bank EBank(int pid)
@@ -1071,6 +1071,143 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
             return t.DBookingNote(pid);
         }
         #endregion
+
+        #region CardType
+        [ValidateAntiForgeryTokenWrapper(HttpVerbs.Post)]
+        public ActionResult DisplayCardType()
+        {
+            if (Request.HttpMethod == "POST")
+            {
+                int CurrPage = 0;
+                int SearchPid = 0;
+                if (ModelState.IsValid)
+                {
+                    CurrPage = Convert.ToInt32(Request["currentPageIndex"]);
+                    SearchPid = Convert.ToInt32(Request["Pid"]);
+                }
+                else
+                {
+                    ModelState.AddModelError("Currpage", "Please check Currpage");
+                    ModelState.AddModelError("SearchPid", "Please check SearchPid");
+                }
+                return View(this.CardType(CurrPage, SearchPid));
+            }
+            else if (Request.HttpMethod == "GET")
+            {
+                return View(this.CardType(1, 0));
+            }
+            return View("Error");
+            ////   GeneralMaster.ClientChain objClientChain = new GeneralMaster.ClientChain();
+            //   TestClass t = new TestClass();
+            ////   objClientChain.listClientChain = t.DisplayClientChain();
+            //   return View(t.DisplayClientChain());
+        }
+        private GeneralMaster.CardType CardType(int currPage, int SearchPid)
+        {
+            TestClass t = new TestClass();
+            return t.DisplayCardType(currPage, SearchPid);
+        }
+
+        [HttpPost]
+        public JsonResult SearchCardTypeByString(string prefix)
+        {
+            TestClass t = new TestClass();
+            return Json(t.SearchCardType(prefix), JsonRequestBehavior.AllowGet);
+        }
+
+        //GET ADDDISCOUNT
+        [HttpGet]
+        public ActionResult AddCardType()
+        {
+            return View(this.ACardType());
+        }
+        //GET ADDDISCOUNT
+        private GeneralMaster.CardType ACardType()
+        {
+            TestClass t = new TestClass();
+            return t.ACardType();
+        }
+
+        //POST ADDDISCOUNT
+        [HttpPost]
+        public ActionResult AddCardType(GeneralMaster.CardType model)
+        {
+            if (!ModelState.IsValid)
+            {
+                //ModelState.AddModelError("DiscountName", "Please check DiscountName");
+                //ModelState.AddModelError("Sequence", "Please check Sequence");
+                //ModelState.AddModelError("Description", "Please check Description");
+            }
+            else
+            {
+                this.ACardType(model);
+                return RedirectToAction("DisplayCardType");
+            }
+            return View("Error");
+        }
+        //POST ADDDISCOUNT
+        private GeneralMaster.CardType ACardType(GeneralMaster.CardType model)
+        {
+            TestClass t = new TestClass();
+            return t.ACardType(model);
+        }
+
+
+        //GET EDITDISCOUNT
+        [HttpGet]
+        public ActionResult EditCardType(int pid)
+        {
+            return View(this.ECardType(pid));
+        }
+        //GET EDITDISCOUNT
+        private GeneralMaster.CardType ECardType(int pid)
+        {
+            TestClass t = new TestClass();
+            return t.ECardType(pid);
+        }
+
+
+        ////POST EDITDISCOUNT
+        [HttpPost]
+        public ActionResult EditCardType(GeneralMaster.CardType model)
+        {
+            if (!ModelState.IsValid)
+            {
+                //ModelState.AddModelError("DiscountName", "Please check DiscountName");
+                //ModelState.AddModelError("Sequence", "Please check Sequence");
+                //ModelState.AddModelError("Description", "Please check Description");
+            }
+            else
+            {
+                this.ECardType(model);
+                return RedirectToAction("DisplayCardType");
+            }
+            return View("Error");
+        }
+        //POst EDITDISCOUNT
+        private GeneralMaster.CardType ECardType(GeneralMaster.CardType model)
+        {
+            TestClass t = new TestClass();
+            return t.ECardType(model);
+        }
+
+        //GET DeeleteDISCOUNT
+        [HttpGet]
+        public ActionResult CardType(int pid)
+        {
+            this.DCardType(pid);
+            return RedirectToAction("DisplayCardType");
+        }
+        //GET DeeleteDISCOUNT
+        private GeneralMaster.CardType DCardType(int pid)
+        {
+            TestClass t = new TestClass();
+            return t.DCardType(pid);
+        }
+
+        #endregion
+
+
         #region ClientChain
         [ValidateAntiForgeryTokenWrapper(HttpVerbs.Post)]
         public ActionResult DisplayClientChain()
