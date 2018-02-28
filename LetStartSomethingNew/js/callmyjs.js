@@ -1,13 +1,13 @@
 ﻿
 $(function () {
     $("#Search").click(function () {
-        if ($("#Search").val() == "") {
+        if ($("#Search").val() === "") {
             alert("Please Select a value before Search");
             return false;
         }
     });
     $("#ShowAll").click(function () {
-        if ($("#Search").val() != "") {
+        if ($("#Search").val() !== "") {
             alert("Please do not enter a value for search");
             return false;
         }

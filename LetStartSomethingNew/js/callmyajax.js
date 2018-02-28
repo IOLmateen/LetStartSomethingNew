@@ -13,14 +13,14 @@
                         response($.map(data, function (item) {
                             pidvalue = item.Pid;
                             return { value: item.DiscountTypeName, label: item.DiscountTypeName };
-                        }))
+                        }));
                     }, error: function (response) {
                         alert(response.responseText);
                     },
                     failure: function (response) {
                         alert(response.responseText);
                     }
-                })
+                });
             },
             select: function (e, i) {
                 $("#Pid").val(pidvalue);
@@ -37,7 +37,7 @@
     function checkrights(pagename, linkname, rightheader) {
         alert("CheckUserRights");
         var pid = getMyPid();
-        if (pid == false) {
+        if (pid === false) {
             alert("Pid is false");
             return false;
         }
@@ -49,7 +49,7 @@
             data: '{pagename: "' + pagename + '" ,linkname: "' + linkname + '",rightheader: "' + rightheader + '"   }',
             success:
             function (data) {
-                if (data == "YES") {
+                if (data === "YES") {
                     alert("You Have rights");
                     switch (rightheader) {
                         //case "ActionDiscountType": window.location.href = '@Url.Action("ActionDiscountType", "GeneralMaster")';
