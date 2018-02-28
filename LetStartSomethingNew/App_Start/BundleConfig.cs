@@ -20,17 +20,20 @@ namespace LetStartSomethingNew
 
 
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                        "~/js/jquery-1.10.2.min.js"));
+                        "~/js/jquery-1.10.2.min.js",
+                        "~/js/callmyajax.js",
+                        "~/js/callmyjs.js"
+                        ));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
-                         "~/js/jquery-ui.min.js"
-                         //"~/js/jquery.js"
+                         "~/js/jquery-ui.min.js",
+                         "~/js/jquery.js"
                          ));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
-                        //"~/js/jquery.validate.min.js",
-                        //"~/js/jquery.unobtrusive-ajax.min.js",
-                        //"~/js/jquery.validate.unobstructive.min.js"
+                        "~/js/jquery.validate.min.js",
+                        "~/js/jquery.unobtrusive-ajax.min.js",
+                        "~/js/jquery.validate.unobstructive.min.js"
                         ));
 
             // Use the development version of Modernizr to develop with and learn from. Then, when you're

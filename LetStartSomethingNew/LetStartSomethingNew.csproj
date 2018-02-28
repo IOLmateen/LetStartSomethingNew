@@ -172,6 +172,8 @@
     <Content Include="Content\Site.css" />
     <Content Include="js\bootstrap.min.js" />
     <None Include="js\jquery-1.10.2.intellisense.js" />
+    <Content Include="js\callmyajax.js" />
+    <Content Include="js\callmyjs.js" />
     <Content Include="js\jquery-1.10.2.min.js" />
     <Content Include="js\jquery-ui.min.js" />
     <Content Include="js\jquery.js" />

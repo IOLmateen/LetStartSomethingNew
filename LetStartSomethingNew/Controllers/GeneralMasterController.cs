@@ -8,8 +8,8 @@ using LetStartSomethingNew.Models.GeneralMaster;
 namespace LetStartSomethingNew.Controllers
 {
 
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    #region Forgerytoken
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
 public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthorizationFilter
 {  
   private readonly ValidateAntiForgeryTokenAttribute _validator;
@@ -30,15 +30,57 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
      }    
   }
 }
-
+    #endregion
 
     public class GeneralMasterController : Controller
     {
+        #region CommentedCode
+
+        //[HttpPost]
+        //public ActionResult SearchDiscount(FormCollection form)
+        //{
+        //    //Passing Using FormCOleection
+        //    string pid = form["pid"];
+        //    return View();
+        //}
+
+
+        //[HttpPost]
+        //public ActionResult SearchDiscount(DiscountTye m)
+        //{
+        //    //Passing Using model
+        //    return View();
+        //}
+
         // GET: GeneralMaster--http://travcostaging2016.iolcloud.com/backoffice/homepage.asp
         public ActionResult Index()
         {
             return View();
         }
+        //[HttpDelete]
+        //public ActionResult DeleteDiscountType()
+        //{
+        //    return View();
+        //}
+
+
+        //[HttpPost]
+        //public ActionResult SearchDiscount()
+        //{
+        //    //Pass using Ajax
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        if (Convert.ToInt32(Request["Pid"]) != 0)
+        //        {
+        //            //GeneralMaster.DiscountType objDiscountType = new GeneralMaster.DiscountType();
+        //            TestClass t = new TestClass();
+        //            //objDiscountType.listDiscountType = t.SearchDiscountTypeByPid(Convert.ToInt32(Request["Pid"]));
+        //            return View("DisplayDiscountType", t.SearchDiscountTypeByPid(Convert.ToInt32(Request["Pid"])));
+        //        }
+        //    }
+        //    return View();
+        //}
 
         //[HttpGet]
         //public ActionResult DisplayDiscountType()
@@ -75,6 +117,9 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
         //     return View(this.DiscountType(1,0));
         // }
 
+        #endregion
+
+        #region CheckUserGroupRights
         [HttpPost]
         public JsonResult CheckUserGroupRights(string pagename, string linkname, string rightheader)
         {
@@ -82,8 +127,9 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
             string FlagYN = t.getUserGroupRights(pagename, linkname, rightheader, Session["UserGroupId"].ToString(), Session["CompanyId"].ToString());
             return Json(FlagYN, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
-
+        #region DiscountType
         [ValidateAntiForgeryTokenWrapper(HttpVerbs.Post)]
         public ActionResult DisplayDiscountType()
         {
@@ -214,33 +260,9 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
             TestClass t = new TestClass();
             return t.DDiscountType(pid);
         }
+        #endregion
 
-
-        //[HttpDelete]
-        //public ActionResult DeleteDiscountType()
-        //{
-        //    return View();
-        //}
-
-
-        //[HttpPost]
-        //public ActionResult SearchDiscount()
-        //{
-        //    //Pass using Ajax
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        if (Convert.ToInt32(Request["Pid"]) != 0)
-        //        {
-        //            //GeneralMaster.DiscountType objDiscountType = new GeneralMaster.DiscountType();
-        //            TestClass t = new TestClass();
-        //            //objDiscountType.listDiscountType = t.SearchDiscountTypeByPid(Convert.ToInt32(Request["Pid"]));
-        //            return View("DisplayDiscountType", t.SearchDiscountTypeByPid(Convert.ToInt32(Request["Pid"])));
-        //        }
-        //    }
-        //    return View();
-        //}
-
+        
 
 
 
@@ -721,21 +743,6 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
 
 
 
-        //[HttpPost]
-        //public ActionResult SearchDiscount(FormCollection form)
-        //{
-        //    //Passing Using FormCOleection
-        //    string pid = form["pid"];
-        //    return View();
-        //}
-
-
-        //[HttpPost]
-        //public ActionResult SearchDiscount(DiscountTye m)
-        //{
-        //    //Passing Using model
-        //    return View();
-        //}
 
             
        

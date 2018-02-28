@@ -263,7 +263,7 @@ namespace DataLayer
             }
         }
 
-        public DataTable getDALGetDiscountTypeById(int id,string action)
+        public DataTable getDALGetDiscountTypeById(int id,string action,string prefix)
         {
             SqlDataReader reader = null;
             DataTable dtgetDiscountTypeById=new DataTable();
@@ -292,6 +292,12 @@ namespace DataLayer
                     param1.Size = 1;
                     sCmd.Parameters.Add(param1);
 
+                    SqlParameter param2 = new SqlParameter();
+                    param2.ParameterName = "@lv_prefixstring";
+                    param2.Value = prefix;
+                    param2.SqlDbType = SqlDbType.VarChar;
+                    param2.Size = 100;
+                    sCmd.Parameters.Add(param2);
 
 
                     reader = sCmd.ExecuteReader();

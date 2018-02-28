@@ -97,7 +97,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         public List<GeneralMaster.DiscountType> SearchDiscountType(string prefix)
         {
-            DataTable dt = objBaseDataLayer.getDALDiscountTypeByPrefix(prefix).Tables[0];
+            //DataTable dt = objBaseDataLayer.getDALDiscountTypeByPrefix(prefix).Tables[0];
+            DataTable dt = objBaseDataLayer.getDALGetDiscountTypeById(-1,"P",prefix);
             var listDiscounType = dt.AsEnumerable().Where(x => x.Field<string>("DiscountType").ToLower().Contains(prefix.ToLower()))
                                         .Select(x => new GeneralMaster.DiscountType
                                         {
@@ -142,7 +143,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         public GeneralMaster.DiscountType EDiscountType(int id)
         {
             GeneralMaster.DiscountType objDiscountType = new GeneralMaster.DiscountType();
-            DataTable dt = objBaseDataLayer.getDALGetDiscountTypeById(id,"E");
+            DataTable dt = objBaseDataLayer.getDALGetDiscountTypeById(id,"E","");
 
             objDiscountType.DiscountTypeName = Convert.ToString(dt.Rows[0]["DiscountType"]);
             objDiscountType.Sequence = Convert.ToInt32(dt.Rows[0]["Sequence"]);
@@ -150,7 +151,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             objDiscountType.Companyxid = Convert.ToInt32(dt.Rows[0]["Companyxid"]);
             objDiscountType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
 
-            if(objDiscountType.NotesXid != 0)
+            if(objDiscountType.NotesXid != -1 )
             { 
                 objDiscountType.NotesDescription = GetNotesById(objDiscountType.NotesXid.GetValueOrDefault(-1));
             }
@@ -165,9 +166,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         public GeneralMaster.DiscountType DDiscountType(int id)
         {
             GeneralMaster.DiscountType objDiscountType = new GeneralMaster.DiscountType();
-            objBaseDataLayer.getDALGetDiscountTypeById(id,"D");
+            objBaseDataLayer.getDALGetDiscountTypeById(id,"D","");
             //string s =DeleteNotesById(notesxid);
-
             return objDiscountType;
         }
         //private string DeleteNotesById(int NotesXid)
@@ -188,11 +188,22 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             objDiscountType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
             objDiscountType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
 
-            if (model.NotesDescription != null)
+            if(model.NotesXid != -1 )
+            { 
+                if (model.NotesDescription != null)
+                {
+                    objDiscountType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objDiscountType.NotesXid = NotesChanges(objNotes.Pid, objDiscountType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid,"E");
+                }
+            }
+            else
             {
-                objDiscountType.NotesDescription = objNotes.NotesName = model.NotesDescription;
-                objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
-                objDiscountType.NotesXid = NotesChanges(objNotes.Pid, objDiscountType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid,"E");
+                if (model.NotesDescription != null)
+                {
+                    objDiscountType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objDiscountType.NotesXid = NotesChanges(objNotes.Pid, objDiscountType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
             }
 
             objBaseDataLayer.getDALInsertModifyDiscountType(objDiscountType.Pid,objDiscountType.DiscountTypeName, objDiscountType.Sequence, objDiscountType.NotesXid.GetValueOrDefault(-1),
