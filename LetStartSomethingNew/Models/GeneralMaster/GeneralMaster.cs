@@ -107,6 +107,10 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
+            public RoomType()
+            {
+            }
+
             public RoomType(Paging passpagingvalues, UserGroupRights passusergrouprights)
             {
                 this.PagingValues = passpagingvalues;
@@ -127,6 +131,11 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int LastEditByXid { get; set; }
 
             public List<Activity> listActivity { get; set; }
+
+            public Activity()
+            {
+            }
+
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -149,6 +158,12 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<AddressType> listAddressType { get; set; }
+
+            public AddressType()
+            {
+            }
+
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -180,6 +195,12 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<Bank> listBank { get; set; }
+
+            public Bank()
+            {
+            }
+
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -204,6 +225,11 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<BookingNote> listBookingNote { get; set; }
+
+            public BookingNote()
+            {
+            }
+
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -234,6 +260,12 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<CardType> listCardType { get; set; }
 
+
+            public CardType()
+            {
+            }
+
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -260,6 +292,12 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<ClientChain> listClientChain { get; set; }
+
+
+            public ClientChain()
+            {
+
+            }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -296,6 +334,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<Airport> listAirport { get; set; }
+
+            public Airport()
+            { }
 
 
         }
@@ -344,6 +385,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Country> listCountry { get; set; }
 
+            public Country() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -378,6 +421,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<City> listCity { get; set; }
 
+            public City() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -406,6 +451,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Currency> listCurrency { get; set; }
 
+            public Currency() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -433,6 +480,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<TradeFairsTypes> listTradeFairsType { get; set; }
 
+            public TradeFairsTypes() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -459,6 +508,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<Facility> listFacility { get; set; }
+
+            public Facility() { }
+
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -489,6 +541,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<FinancialYear> listFinancialYear { get; set; }
 
+            public FinancialYear() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -515,6 +569,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<HolidayDuration> listHolidayDuration { get; set; }
 
+            public HolidayDuration() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -540,6 +596,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<HolidayType> listHolidayType { get; set; }
+
+            public HolidayType() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -572,6 +630,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<HotelStandard> listHotelStandard { get; set; }
 
+            public HotelStandard() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -603,6 +663,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<HotelChain> listHotelChain { get; set; }
 
+            public HotelChain() { }
+
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -627,6 +690,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<InspectionCriteria> listInspectionCriteria { get; set; }
+
+
+            public InspectionCriteria() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -654,6 +720,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Language> listLanguage { get; set; }
 
+            public Language() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -679,6 +747,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<Market> listMarket { get; set; }
+
+            public Market() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -708,6 +778,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<MealPlan> listMealPlan { get; set; }
 
+            public MealPlan() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -735,6 +807,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Nationality> listNationality { get; set; }
 
+            public Nationality() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -761,6 +835,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public Nullable<int> MarketXid { get; set; }
 
             public List<PaymentSchedules> listPaymentSchedules { get; set; }
+
+
+            public PaymentSchedules() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -794,6 +871,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<PaymentType> listPaymentType { get; set; }
 
+            public PaymentType() { }
+
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -824,6 +904,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<LogisticPickupType> listLogisticPickupType { get; set; }
 
+
+            public LogisticPickupType() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -848,6 +931,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<CrmPriority> listCrmPriority { get; set; }
+
+            public CrmPriority() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -876,6 +961,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<PropertyType> listPropertyType { get; set; }
 
+            public PropertyType() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -903,6 +990,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Reason> listReason { get; set; }
 
+            public Reason() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -928,6 +1017,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<ReportingState> listReportingState { get; set; }
+
+            public ReportingState() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -995,6 +1086,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Source> listSource { get; set; }
 
+            public Source() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1026,6 +1119,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public string Movercolour { get; set; }
 
             public List<Status> listStatus { get; set; }
+
+            public Status() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1066,6 +1161,9 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Supplement> listSupplement { get; set; }
 
+            public Supplement() { }
+
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1092,6 +1190,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public string OTASupplementTYpe { get; set; }
 
             public List<SupplementType> listSupplementType { get; set; }
+
+            public SupplementType() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1122,6 +1222,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Tax> listTax { get; set; }
 
+            public Tax() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1148,6 +1250,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public string Gender { get; set; }
 
             public List<Title> listTitle { get; set; }
+
+            public Title() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1206,6 +1310,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             
             public List<Company> listCompany { get; set; }
 
+            public Company() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1244,6 +1350,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Department> listDepartment { get; set; }
 
+            public Department() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1270,6 +1378,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<Designation> listDesignation { get; set; }
+
+            public Designation() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1314,6 +1424,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<DMCSystemConfiguration> listDMCSystemConfiguration { get; set; }
 
+            public DMCSystemConfiguration() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1356,6 +1467,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<ImageLibrary> listImageLibrary { get; set; }
 
+            public ImageLibrary() { }
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1385,6 +1497,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<Depot> listDepot { get; set; }
+
+            public Depot() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1418,6 +1532,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<ContractingGroup> listContractingGroup { get; set; }
+
+            public ContractingGroup() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1457,6 +1573,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<TblTariff> listTblTariff { get; set; }
 
+            public TblTariff() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1489,6 +1607,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<TblTariffMarkets> listTblTariffMarkets { get; set; }
 
+            public TblTariffMarkets() { }
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1579,6 +1698,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<Client> listClient { get; set; }
 
+            public Client() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1616,6 +1737,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             
             public List<Airline> listAirline { get; set; }
 
+            public Airline() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1641,6 +1764,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public int CompanyXid { get; set; }
 
             public List<ResourceType> listResourceType { get; set; }
+
+            public ResourceType() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1733,6 +1858,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<ResourceVehicleDtls> listResourceVehicleDtls { get; set; }
 
+            public ResourceVehicleDtls() { }
+
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 
@@ -1765,6 +1892,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<LogisticVehicleType> listLogisticVehicleType { get; set; }
 
+            public LogisticVehicleType() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1797,6 +1925,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             public string Code { get; set; }
 
             public List<LogisticPickupArea> listLogisticPickupArea { get; set; }
+
+            public LogisticPickupArea() { }
 
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
@@ -1832,6 +1962,7 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
             public List<LogisticJourneyTimes> listLogisticJourneyTimes { get; set; }
 
+            public LogisticJourneyTimes() { }
             public UserGroupRights Usergrouprights { get; set; }
             public Paging PagingValues { get; set; }
 

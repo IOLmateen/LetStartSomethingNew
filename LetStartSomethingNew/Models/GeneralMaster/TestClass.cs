@@ -238,20 +238,11 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             return objDiscountType;
         }
 
-        
-
-
-
         //POSTADD DISCOUNT for NOTES
         private int NotesChanges(int Pid,string NotesName,int LastEditByXid, int CompanyXid,string Action)
         {
             return objBaseDataLayer.getDALNotesChanges(Pid,NotesName, LastEditByXid, CompanyXid,Action);
         }
-
-
-
-
-
 
         //****************************************
 
@@ -270,38 +261,144 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objRoomType;
         //}
+        internal GeneralMaster.RoomType DisplayRoomType(int currPage, int searchPid)
+        {
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                                select new GeneralMaster.RoomType
+                                                {
+                                                    Pid = Convert.ToInt32(dr["Pid"]),
+                                                    RoomTypeName = dr["RoomType"].ToString(),
+                                                    MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                                    LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                                }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+        }
 
         internal object SearchRoomType(string prefix)
         {
-            throw new NotImplementedException();
+            
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.RoomType ARoomType()
         {
-            throw new NotImplementedException();
-        }
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
 
-        internal GeneralMaster.RoomType DisplayRoomType(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-        internal GeneralMaster.RoomType ERoomType(int pid)
-        {
-            throw new NotImplementedException();
         }
 
         internal GeneralMaster.RoomType ARoomType(GeneralMaster.RoomType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "A");
+
+            return objRoomType;
+
+        }
+
+        internal GeneralMaster.RoomType ERoomType(int pid)
+        {
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+            
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
+        }
+
+        internal GeneralMaster.RoomType ERoomType(GeneralMaster.RoomType model)
+        {
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.RoomType DRoomType(int pid)
         {
-            throw new NotImplementedException();
-        }
-        internal GeneralMaster.RoomType ERoomType(GeneralMaster.RoomType model)
-        {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         //******************************************
@@ -325,37 +422,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Activity DisplayActivity(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayActivity");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.Activity objActivity = new GeneralMaster.Activity(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("Activity", searchPid).Tables[0];
+
+            objActivity.listActivity = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.Activity
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            Code = dr["Code"].ToString(),
+                                            ActivityName = Convert.ToString(dr["Activity"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objActivity.PagingValues.MaxRows)
+                                .Take(objActivity.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objActivity.PagingValues.MaxRows));
+            objActivity.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objActivity.PagingValues.CurrentPageIndex = currPage;
+
+            return objActivity;
+
         }
 
         internal object SearchActivity(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetActivityById(-1, "P", prefix);
+            var listActivity = dt.AsEnumerable().Where(x => x.Field<string>("Activity").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.Activity
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            ActivityName = x.Field<string>("Activity")
+                                        }).ToList();
+
+            return listActivity;
         }
 
         internal GeneralMaster.Activity AActivity()
         {
-            throw new NotImplementedException();
+            GeneralMaster.Activity objActivity = new GeneralMaster.Activity();
+            return objActivity;
         }
 
         internal GeneralMaster.Activity AActivity(GeneralMaster.Activity model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.Activity objActivity = new GeneralMaster.Activity();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objActivity.Pid = objNotes.Pid = -1;
+            objActivity.Code = model.Code;
+            objActivity.ActivityName = model.ActivityName;
+
+            objActivity.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objActivity.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objActivity.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objActivity.NotesXid = NotesChanges(objNotes.Pid, objActivity.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyActivity(objActivity.Pid, objActivity.Code, objActivity.ActivityName, objActivity.NotesXid.GetValueOrDefault(-1),
+                                                      objActivity.LastEditByXid, objActivity.CompanyXid, "A");
+
+            return objActivity;
+
         }
 
         internal GeneralMaster.Activity EActivity(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.Activity objActivity  = new GeneralMaster.Activity();
+            DataTable dt = objBaseDataLayer.getDALGetActivityById(pid, "E", "");
+
+
+            objActivity.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objActivity.Code = dt.Rows[0]["Code"].ToString();
+            objActivity.ActivityName = dt.Rows[0]["ActivityName"].ToString();
+            objActivity.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objActivity.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objActivity.NotesXid != -1)
+            {
+                objActivity.NotesDescription = GetNotesById(objActivity.NotesXid.GetValueOrDefault(-1));
+            }
+            return objActivity;
+
         }
 
         internal GeneralMaster.Activity EActivity(GeneralMaster.Activity model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.Activity objActivity = new GeneralMaster.Activity();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objActivity.Pid = model.Pid;
+            objActivity.Code = model.Code;
+            objActivity.ActivityName = model.ActivityName;
+
+            objActivity.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objActivity.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objActivity.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objActivity.NotesXid = NotesChanges(objNotes.Pid, objActivity.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objActivity.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objActivity.NotesXid = NotesChanges(objNotes.Pid, objActivity.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyActivity(objActivity.Pid, objActivity.Code, objActivity.ActivityName, objActivity.NotesXid.GetValueOrDefault(-1),
+                                                      objActivity.LastEditByXid, objActivity.CompanyXid, "E");
+
+            return objActivity;
+
         }
 
         internal GeneralMaster.Activity DActivity(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.Activity objActivity = new GeneralMaster.Activity();
+            objBaseDataLayer.getDALGetActivityById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objActivity;
         }
 
 
@@ -380,37 +580,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.AddressType DisplayAddressType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayAddressType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.AddressType objAddressType = new GeneralMaster.AddressType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("AddressType", searchPid).Tables[0];
+
+            objAddressType.listAddressType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.AddressType
+                                        {
+                                            //Pid = Convert.ToInt32(dr["Pid"]),
+                                            //RoomTypeName = dr["RoomType"].ToString(),
+                                            //MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            //LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objAddressType.PagingValues.MaxRows)
+                                .Take(objAddressType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objAddressType.PagingValues.MaxRows));
+            objAddressType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objAddressType.PagingValues.CurrentPageIndex = currPage;
+
+            return objAddressType;
+
         }
 
         internal object SearchAddressType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetAddressTypeById(-1, "P", prefix);
+            var listobjAddressType = dt.AsEnumerable().Where(x => x.Field<string>("AddressType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.AddressType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            AddressTypeName = x.Field<string>("AddressType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.AddressType AAddressType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.AddressType AAddressType(GeneralMaster.AddressType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.AddressType EAddressType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.AddressType EAddressType(GeneralMaster.AddressType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.AddressType DAddressType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         #endregion
@@ -435,37 +739,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Bank DisplayBank(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchBank(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Bank ABank()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Bank ABank(GeneralMaster.Bank model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Bank EBank(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Bank EBank(GeneralMaster.Bank model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Bank DBank(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         #endregion
@@ -488,37 +896,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.BookingNote DisplayBookingNote(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchBookingNote(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.BookingNote ABookingNote()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.BookingNote ABookingNote(GeneralMaster.BookingNote model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.BookingNote EBookingNote(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.BookingNote EBookingNote(GeneralMaster.BookingNote model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.BookingNote DBookingNote(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -547,37 +1059,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.CardType DCardType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         internal GeneralMaster.CardType ECardType(GeneralMaster.CardType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.CardType ECardType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.CardType ACardType(GeneralMaster.CardType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.CardType ACardType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal object SearchCardType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.CardType DisplayCardType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
 
@@ -599,40 +1215,144 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.ClientChain DisplayClientChain(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchClientChain(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.ClientChain AClientChain()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.ClientChain AClientChain(GeneralMaster.ClientChain model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ClientChain EClientChain(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ClientChain EClientChain(GeneralMaster.ClientChain model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ClientChain DClientChain(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
-        
+
 
 
 
@@ -660,37 +1380,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Currency DisplayCurrency(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchCurrency(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Currency ACurrency()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Currency ACurrency(GeneralMaster.Currency model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Currency ECurrency(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Currency ECurrency(GeneralMaster.Currency model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Currency DCurrency(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         #endregion
@@ -713,37 +1537,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.TradeFairsTypes DisplayTradeFairsTypes(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchTradeFairsTypes(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.TradeFairsTypes ATradeFairsTypes()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.TradeFairsTypes ATradeFairsTypes(GeneralMaster.TradeFairsTypes model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TradeFairsTypes ETradeFairsTypes(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TradeFairsTypes ETradeFairsTypes(GeneralMaster.TradeFairsTypes model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TradeFairsTypes DTradeFairsTypes(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         #endregion
@@ -767,37 +1695,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Facility DisplayFacility(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchFacility(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Facility AFacility()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Facility AFacility(GeneralMaster.Facility model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Facility EFacility(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Facility EFacility(GeneralMaster.Facility model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Facility DFacility(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         #endregion
@@ -821,37 +1853,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.FinancialYear DisplayFinancialYear(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchFinancialYear(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.FinancialYear AFinancialYear()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.FinancialYear AFinancialYear(GeneralMaster.FinancialYear model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.FinancialYear EFinancialYear(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.FinancialYear EFinancialYear(GeneralMaster.FinancialYear model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.FinancialYear DFinancialYear(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -877,37 +2013,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.HolidayDuration DisplayHolidayDuration(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchHolidayDuration(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.HolidayDuration AHolidayDuration()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.HolidayDuration AHolidayDuration(GeneralMaster.HolidayDuration model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HolidayDuration EHolidayDuration(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HolidayDuration EHolidayDuration(GeneralMaster.HolidayDuration model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HolidayDuration DHolidayDuration(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -930,37 +2170,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.HolidayType DisplayHolidayType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchHolidayType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.HolidayType AHolidayType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.HolidayType AHolidayType(GeneralMaster.HolidayType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HolidayType EHolidayType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HolidayType EHolidayType(GeneralMaster.HolidayType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HolidayType DHolidayType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -983,37 +2327,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.HotelStandard DisplayHotelStandard(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchHotelStandard(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.HotelStandard AHotelStandard()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.HotelStandard AHotelStandard(GeneralMaster.HotelStandard model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HotelStandard EHotelStandard(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HotelStandard ERHotelStandard(GeneralMaster.HotelStandard model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HotelStandard DHotelStandard(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1038,37 +2486,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.HotelChain DisplayHotelChain(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchHotelChain(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.HotelChain AHotelChain()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.HotelChain AHotelChain(GeneralMaster.HotelChain model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HotelChain EHotelChain(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HotelChain EHotelChain(GeneralMaster.HotelChain model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HotelChain DHotelChain(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1091,37 +2643,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.InspectionCriteria DisplayInspectionCriteria(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchInspectionCriteria(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.InspectionCriteria AInspectionCriteria()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.InspectionCriteria AInspectionCriteria(GeneralMaster.InspectionCriteria model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.InspectionCriteria EInspectionCriteria(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.InspectionCriteria EInspectionCriteria(GeneralMaster.InspectionCriteria model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.InspectionCriteria DInspectionCriteria(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1147,37 +2802,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Language DisplayLanguage(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchLanguage(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Language ALanguage()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Language ALanguage(GeneralMaster.Language model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Language ELanguage(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Language ELanguage(GeneralMaster.Language model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Language DLanguage(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1201,37 +2959,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Market DisplayMarket(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchMarket(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Market AMarket()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Market AMarket(GeneralMaster.Market model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Market EMarket(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Market EMarket(GeneralMaster.Market model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Market DMarket(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1256,37 +3117,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.MealPlan DisplayMealPlan(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchMealPlan(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.MealPlan AMealPlan()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.MealPlan AMealPlan(GeneralMaster.MealPlan model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.MealPlan EMealPlan(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.MealPlan EMealPlan(GeneralMaster.MealPlan model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.MealPlan DMealPlan(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1309,37 +3273,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Nationality DisplayNationality(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchNationality(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Nationality ANationality()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Nationality ANationality(GeneralMaster.Nationality model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Nationality ENationality(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Nationality ENationality(GeneralMaster.Nationality model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Nationality DNationality(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1363,37 +3430,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.PaymentSchedules DisplayPaymentSchedules(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchPaymentSchedules(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.PaymentSchedules APaymentSchedules()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.PaymentSchedules APaymentSchedules(GeneralMaster.PaymentSchedules model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.PaymentSchedules EPaymentSchedules(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.PaymentSchedules EPaymentSchedules(GeneralMaster.PaymentSchedules model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.PaymentSchedules DPaymentSchedules(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1416,37 +3586,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.PaymentType DisplayPaymentType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchPaymentType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.PaymentType APaymentType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.PaymentType APaymentType(GeneralMaster.PaymentType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.PaymentType EPaymentType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.PaymentType EPaymentType(GeneralMaster.PaymentType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.PaymentType DPaymentType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1472,37 +3745,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.LogisticPickupType DisplayLogisticPickuptype(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchLogisticPickupType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.LogisticPickupType ALogisticPickupType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.LogisticPickupType ALogisticPickupType(GeneralMaster.LogisticPickupType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticPickupType ELogisticPickupType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.LogisticPickupType ELogisticPickupType(GeneralMaster.LogisticPickupType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticPickupType DLogisticPickupType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1526,37 +3902,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.CrmPriority DisplayCrmPriority(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchCrmPriority(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.CrmPriority ACrmPriority()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.CrmPriority ACrmPriority(GeneralMaster.CrmPriority model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.CrmPriority ECrmPriority(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.CrmPriority ECrmPriority(GeneralMaster.CrmPriority model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.CrmPriority DCrmPriority(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1579,35 +4058,138 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.PropertyType DisplayPropertyType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchPropertyType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
         internal GeneralMaster.PropertyType APropertyType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
         internal GeneralMaster.PropertyType APropertyType(GeneralMaster.PropertyType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.PropertyType EPropertyType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.PropertyType EPropertyType(GeneralMaster.PropertyType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.PropertyType DPropertyType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1630,37 +4212,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Reason DisplayReason(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchReason(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Reason AReason()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Reason AReason(GeneralMaster.Reason model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Reason EReason(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Reason EReason(GeneralMaster.Reason model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Reason DReason(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1684,38 +4369,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.ReportingState DisplayReportingState(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchReportingState(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
         internal GeneralMaster.ReportingState AReportingState()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
 
 
         internal GeneralMaster.ReportingState AReportingState(GeneralMaster.ReportingState model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ReportingState EReportingState(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.ReportingState EReportingState(GeneralMaster.ReportingState model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ReportingState DReportingState(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1763,37 +4551,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Season DisplaySeason(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchSeason(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Season ASeason()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Season ASeason(GeneralMaster.Season model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Season ESeason(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Season ESeason(GeneralMaster.Season model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Season DSeason(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1816,37 +4707,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Source DisplaySource(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchSource(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Source ASource()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Source ASource(GeneralMaster.Source model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Source ESource(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Source ESource(GeneralMaster.Source model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Source DSource(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1874,37 +4868,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Status DisplayStatus(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
         }
 
         internal object SearchStatus(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Status AStatus()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Status AStatus(GeneralMaster.Status model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Status EStatus(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Status EStatus(GeneralMaster.Status model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Status DStatus(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1946,37 +5043,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Supplement DisplaySupplement(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchSupplement(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Supplement ASupplement()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Supplement ASupplement(GeneralMaster.Supplement model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Supplement ESupplement(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Supplement ESupplement(GeneralMaster.Supplement model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Supplement DSupplement(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -1999,37 +5200,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.SupplementType DisplaySupplementType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchSupplementType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.SupplementType ASupplementType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Supplement ASupplementType(GeneralMaster.SupplementType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.SupplementType ESupplementType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.SupplementType ESupplementType(GeneralMaster.SupplementType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.SupplementType DSupplementType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2055,37 +5360,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Tax DisplayTax(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchTax(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Tax ATax()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Tax ATax(GeneralMaster.Tax model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Tax ETax(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Tax ETax(GeneralMaster.Tax model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Tax DTax(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2109,37 +5518,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Title DisplayTitle(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchTitle(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Title ATitle()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Title ATitle(GeneralMaster.Title model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Title ETitle(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Title ETitle(GeneralMaster.Title model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Title DTitle(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2177,37 +5689,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Company DisplayCompany(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchCompany(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Company ACompany()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Company ACompany(GeneralMaster.Company model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Company ECompany(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Company ECompany(GeneralMaster.Company model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Company DCompany(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2231,37 +5846,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Department DisplayDepartment(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchDepartment(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Department ADepartment()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Department ADepartment(GeneralMaster.Department model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Department EDepartment(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Department EDepartment(GeneralMaster.Department model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Department DDepartment(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2285,37 +6003,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Designation DisplayDesignation(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchDesignation(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Designation ADesignation()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Designation ADesignation(GeneralMaster.Designation model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Designation EDesignation(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Designation EDesignation(GeneralMaster.Designation model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Designation DDesignation(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2345,37 +6166,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.DMCSystemConfiguration DisplayDMCSystemConfiguration(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchDMCSystemConfiguration(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.DMCSystemConfiguration ADMCSystemConfiguration()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.DMCSystemConfiguration ADMCSystemConfiguration(GeneralMaster.DMCSystemConfiguration model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.DMCSystemConfiguration EDMCSystemConfiguration(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.DMCSystemConfiguration EDMCSystemConfiguration(GeneralMaster.DMCSystemConfiguration model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.DMCSystemConfiguration DDMCSystemConfiguration(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2409,37 +6333,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.ImageLibrary DisplayImageLibrary(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchImageLibrary(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.ImageLibrary AImageLibrary()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.ImageLibrary EImageLibrary(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.ImageLibrary EImageLibrary(GeneralMaster.ImageLibrary model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ImageLibrary AImageLibrary(GeneralMaster.ImageLibrary model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ImageLibrary DImageLibrary(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2474,37 +6501,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.Depot DisplayDepot(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
-        internal object SearchRDepot(string prefix)
+        internal object SearchDepot(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Depot ADepot()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Depot ADepot(GeneralMaster.Depot model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Depot EDepot(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Depot EDepot(GeneralMaster.Depot model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Depot DDepot(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2530,37 +6660,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.ContractingGroup DisplayContractingGroup(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchContractingGroup(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.ContractingGroup AContractingGroup()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.ContractingGroup AContractingGroup(GeneralMaster.ContractingGroup model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
-        internal GeneralMaster.ContractingGroup ContractingGroup(int pid)
+        internal GeneralMaster.ContractingGroup EContractingGroup(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ContractingGroup EContractingGroup(GeneralMaster.ContractingGroup model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ContractingGroup DContractingGroup(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2584,37 +6818,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.TblTariff DisplayTblTariff(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchTblTariff(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.TblTariff ATblTariff()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.TblTariff ATblTariff(GeneralMaster.TblTariff model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TblTariff ETblTariff(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TblTariff ETblTariff(GeneralMaster.TblTariff model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TblTariff DTblTariff(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2646,37 +6984,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.TblTariffMarkets DisplayTblTariffMarkets(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchTblTariffMarkets(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.TblTariffMarkets ATblTariffMarkets()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.TblTariffMarkets ATblTariffMarkets(GeneralMaster.TblTariffMarkets model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TblTariffMarkets ETblTariffMarkets(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.TblTariffMarkets ETblTariffMarkets(GeneralMaster.TblTariffMarkets model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.TblTariffMarkets DTblTariffMarkets(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2713,40 +7154,143 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Client DisplayClient(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchClient(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Client AClient()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Client AClient(GeneralMaster.Client model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Client EClient(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Client EClient(GeneralMaster.Client model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Client DClient(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
-       
+
 
         #endregion
         #region Airline
@@ -2766,37 +7310,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.Airline DisplayAirline(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchAirline(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.Airline AAirline()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.Airline AAirline(GeneralMaster.Airline model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Airline EAirline(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.Airline EAirline(GeneralMaster.Airline model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.Airline DAirline(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2820,37 +7467,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.ResourceType DisplayResourceType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchResourceType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.ResourceType AResourceType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.ResourceType AResourceType(GeneralMaster.ResourceType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ResourceType EResourceType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.ResourceType EResourceType(GeneralMaster.ResourceType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ResourceType DResourceType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -2891,37 +7641,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.HumanResource DisplayHumanResource(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchHumanResource(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.HumanResource AHumanResource()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.HumanResource AHumanResource(GeneralMaster.HumanResource model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HumanResource EHumanResource(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.HumanResource EHumanResource(GeneralMaster.HumanResource model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.HumanResource DHumanResource(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
         #endregion
         #region ResourcevehicleType
@@ -2957,37 +7810,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.ResourceVehicleDtls DisplayResourceVehicleDtls(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchResourceVehicleDtls(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.ResourceVehicleDtls AResourceVehicleDtls()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.ResourceVehicleDtls AResourceVehicleDtls(GeneralMaster.ResourceVehicleDtls model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ResourceVehicleDtls EResourceVehicleDtls(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.ResourceVehicleDtls EResourceVehicleDtls(GeneralMaster.ResourceVehicleDtls model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.ResourceVehicleDtls DResourceVehicleDtls(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -3021,37 +7977,140 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.LogisticVehicleType DisplayLogisticVehicleType(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchLogisticVehicleType(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.LogisticVehicleType ALogisticVehicleType()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.LogisticVehicleType ALogisticVehicleType(GeneralMaster.LogisticVehicleType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticVehicleType ELogisticVehicleType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
         }
 
         internal GeneralMaster.LogisticVehicleType ELogisticVehicleType(GeneralMaster.LogisticVehicleType model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticVehicleType DLogisticVehicleType(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
 
@@ -3084,37 +8143,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         internal GeneralMaster.LogisticPickupArea DisplayLogisticPickupArea(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchLogisticPickupArea(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.LogisticPickupArea ALogisticPickupArea()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.LogisticPickupArea ALogisticPickupArea(GeneralMaster.LogisticPickupArea model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticPickupArea ELogisticPickupArea(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticPickupArea ELogisticPickupArea(GeneralMaster.LogisticPickupArea model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticPickupArea DLogisticPickupArea(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
 
         #endregion
@@ -3142,37 +8305,141 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //}
         internal GeneralMaster.LogisticJourneyTimes DisplayLogisticJourneyTimes(int currPage, int searchPid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.UserGroupRights objUsergrouprights = new GeneralMaster.UserGroupRights();
+            getUserSettings(objUsergrouprights, "DisplayRoomType");
+
+            GeneralMaster.Paging objPaging = new GeneralMaster.Paging();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType(objPaging, objUsergrouprights);
+            DataTable dt = objBaseDataLayer.getDALGeneralMaster1("RoomType", searchPid).Tables[0];
+
+            objRoomType.listRoomType = (from DataRow dr in dt.Rows
+                                        select new GeneralMaster.RoomType
+                                        {
+                                            Pid = Convert.ToInt32(dr["Pid"]),
+                                            RoomTypeName = dr["RoomType"].ToString(),
+                                            MaxNoPpl = Convert.ToInt32(dr["MaxNoPpl"]),
+                                            LastEdit = Convert.ToDateTime(dr["lastEdit"])
+                                        }
+                               ).Skip((currPage - 1) * objRoomType.PagingValues.MaxRows)
+                                .Take(objRoomType.PagingValues.MaxRows).ToList();
+
+            double pageCount = (double)((decimal)dt.Rows.Count / Convert.ToDecimal(objRoomType.PagingValues.MaxRows));
+            objRoomType.PagingValues.PageCount = (int)Math.Ceiling(pageCount);
+
+            objRoomType.PagingValues.CurrentPageIndex = currPage;
+
+            return objRoomType;
+
         }
 
         internal object SearchLogisticJourneyTimes(string prefix)
         {
-            throw new NotImplementedException();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(-1, "P", prefix);
+            var listRoomType = dt.AsEnumerable().Where(x => x.Field<string>("RoomType").ToLower().Contains(prefix.ToLower()))
+                                        .Select(x => new GeneralMaster.RoomType
+                                        {
+                                            Pid = x.Field<int>("Pid"),
+                                            RoomTypeName = x.Field<string>("RoomType")
+                                        }).ToList();
+
+            return listRoomType;
+
         }
 
         internal GeneralMaster.LogisticJourneyTimes ALogisticJourneyTimes()
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            return objRoomType;
         }
 
         internal GeneralMaster.LogisticJourneyTimes ALogisticJourneyTimes(GeneralMaster.LogisticJourneyTimes model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = objNotes.Pid = -1;
+            objRoomType.DiscountTypeName = model.DiscountTypeName;
+            objRoomType.Sequence = model.Sequence;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.Companyxid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesDescription != null)
+            {
+                objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.DiscountTypeName, objRoomType.Sequence, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.Companyxid, "A");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticJourneyTimes ELogisticJourneyTimes(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            DataTable dt = objBaseDataLayer.getDALGetRoomTypeById(pid, "E", "");
+
+
+            objRoomType.Pid = Convert.ToInt32(dt.Rows[0]["Pid"]);
+            objRoomType.RoomTypeName = dt.Rows[0]["RoomType"].ToString();
+            objRoomType.MaxNoPpl = Convert.ToInt32(dt.Rows[0]["MaxNoPpl"]);
+            objRoomType.LastEdit = Convert.ToDateTime(dt.Rows[0]["lastEdit"]);
+            objRoomType.NotesXid = Convert.ToInt32(dt.Rows[0]["NotesXid"]);
+
+            if (objRoomType.NotesXid != -1)
+            {
+                objRoomType.NotesDescription = GetNotesById(objRoomType.NotesXid.GetValueOrDefault(-1));
+            }
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticJourneyTimes ELogisticJourneyTimes(GeneralMaster.LogisticJourneyTimes model)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            GeneralMaster.Notes objNotes = new GeneralMaster.Notes();
+
+            objRoomType.Pid = model.Pid;
+            objRoomType.RoomTypeName = model.RoomTypeName;
+            objRoomType.MaxNoPpl = model.MaxNoPpl;
+
+            objRoomType.LastEditByXid = objNotes.LastEditByXid = Convert.ToInt32(HttpContext.Current.Session["UserId"]);
+            objRoomType.CompanyXid = objNotes.CompanyXid = Convert.ToInt32(HttpContext.Current.Session["CompanyId"]);
+
+            if (model.NotesXid != -1)
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objNotes.Pid = model.NotesXid.GetValueOrDefault(-1);
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "E");
+                }
+            }
+            else
+            {
+                if (model.NotesDescription != null)
+                {
+                    objRoomType.NotesDescription = objNotes.NotesName = model.NotesDescription;
+                    objRoomType.NotesXid = NotesChanges(objNotes.Pid, objRoomType.NotesDescription, objNotes.LastEditByXid, objNotes.CompanyXid, "A");
+                }
+            }
+
+            objBaseDataLayer.getDALInsertModifyRoomType(objRoomType.Pid, objRoomType.RoomTypeName, objRoomType.MaxNoPpl, objRoomType.NotesXid.GetValueOrDefault(-1),
+                                                      objRoomType.LastEditByXid, objRoomType.CompanyXid, "E");
+
+            return objRoomType;
+
         }
 
         internal GeneralMaster.LogisticJourneyTimes DLogisticJourneyTimes(int pid)
         {
-            throw new NotImplementedException();
+            GeneralMaster.RoomType objRoomType = new GeneralMaster.RoomType();
+            objBaseDataLayer.getDALGetRoomTypeById(id, "D", "");
+            //string s =DeleteNotesById(notesxid);
+            return objRoomType;
         }
         #endregion
         //public List<GeneralMaster.VM_Airport> DisplayAirport()
