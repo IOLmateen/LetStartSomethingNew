@@ -1342,6 +1342,25 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             throw new NotImplementedException();
         }
 
+
+
+
+        #endregion
+        #region PaymentSchedule
+        //public GeneralMaster.PaymentSchedules DisplayPaymentSchedules()
+        //{
+        //    GeneralMaster.PaymentSchedules objPaymentSchedules = new GeneralMaster.PaymentSchedules();
+        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("PaymentSchedules").Tables[0];
+        //    objPaymentSchedules.listPaymentSchedules = (from DataRow dr in dt.Rows
+        //                               select new GeneralMaster.PaymentSchedules
+        //                               {
+        //                                   Pid = Convert.ToInt32(dr["Pid"]),
+        //                                   PaymentSchedulesName = Convert.ToString(dr["PaymentSchedule"]),
+        //                                   LastEdit = Convert.ToDateTime(dr["LastEdit"]),
+        //                               }
+        //                       ).ToList();
+        //    return objPaymentSchedules;
+        //}
         internal GeneralMaster.PaymentSchedules DisplayPaymentSchedules(int currPage, int searchPid)
         {
             throw new NotImplementedException();
@@ -1377,6 +1396,24 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             throw new NotImplementedException();
         }
 
+
+        #endregion
+        #region paymentType
+        //public GeneralMaster.PaymentType DisplayPaymentType()
+        //{
+        //    GeneralMaster.PaymentType objPaymentType = new GeneralMaster.PaymentType();
+        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("PaymentType").Tables[0];
+        //    objPaymentType.listPaymentType = (from DataRow dr in dt.Rows
+        //                               select new GeneralMaster.PaymentType
+        //                               {
+        //                                   Pid = Convert.ToInt32(dr["Pid"]),
+        //                                   PaymentTypeName =Convert.ToString(dr["PaymentType"]),
+        //                                   NominalCode = Convert.ToString(dr["nominalCode"]),
+        //                                   LastEdit = Convert.ToDateTime(dr["LastEdit"])
+        //                               }
+        //                       ).ToList();
+        //    return objPaymentType;
+        //}
         internal GeneralMaster.PaymentType DisplayPaymentType(int currPage, int searchPid)
         {
             throw new NotImplementedException();
@@ -1411,6 +1448,27 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         {
             throw new NotImplementedException();
         }
+
+
+        #endregion
+        #region Logisticpickuptype
+        //public GeneralMaster.LogisticPickupType DisplayLogisticPickupType()
+        //{
+        //    GeneralMaster.LogisticPickupType objLogisticPickupType = new GeneralMaster.LogisticPickupType();
+        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("LogisticPickupType").Tables[0];
+        //    objLogisticPickupType.listLogisticPickupType = (from DataRow dr in dt.Rows
+        //                               select new GeneralMaster.LogisticPickupType
+        //                               {
+        //                                   Pid = Convert.ToInt32(dr["Pid"]),
+        //                                   PickupType = Convert.ToString(dr["Pickuptype"]),
+        //                                   ShowBookingEngine =Convert.ToString(dr["showbookingengine"]),
+        //                                   ArrivalPoint = Convert.ToString(dr["ArrivalPOint"]),
+
+        //                                   LastEdit = Convert.ToDateTime(dr["LastEdit"])
+        //                               }
+        //                       ).ToList();
+        //    return objLogisticPickupType;
+        //}
 
         internal GeneralMaster.LogisticPickupType DisplayLogisticPickuptype(int currPage, int searchPid)
         {
@@ -1447,6 +1505,25 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             throw new NotImplementedException();
         }
 
+
+
+        #endregion
+        #region Crmpriority
+        ////Pending
+        //public GeneralMaster.CrmPriority DisplayCrmPriority()
+        //{
+        //    GeneralMaster.CrmPriority objCrmPriority = new GeneralMaster.CrmPriority();
+        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("CrmPriority").Tables[0];
+        //    objCrmPriority.listCrmPriority = (from DataRow dr in dt.Rows
+        //                           select new GeneralMaster.CrmPriority
+        //                           {
+        //                               Pid = Convert.ToInt32(dr["Pid"]),
+        //                               Priority = Convert.ToString(dr["priority"]),
+        //                               LastEdit = Convert.ToDateTime(dr["LastEdit"])
+        //                           }
+        //                       ).ToList();
+        //    return objCrmPriority;
+        //}
         internal GeneralMaster.CrmPriority DisplayCrmPriority(int currPage, int searchPid)
         {
             throw new NotImplementedException();
@@ -1482,6 +1559,24 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             throw new NotImplementedException();
         }
 
+
+
+        #endregion
+        #region PropertyType
+        //public GeneralMaster.PropertyType DisplayPropertyType()
+        //{
+        //    GeneralMaster.PropertyType objPropertyType = new GeneralMaster.PropertyType();
+        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("PropertyType").Tables[0];
+        //    objPropertyType.listPropertyType = (from DataRow dr in dt.Rows
+        //                            select new GeneralMaster.PropertyType
+        //                            {
+        //                                Pid = Convert.ToInt32(dr["Pid"]),
+        //                                PropertyTypeName = Convert.ToString(dr["PropertyType"]),
+        //                                LastEdit = Convert.ToDateTime(dr["LastEdit"])
+        //                            }
+        //                       ).ToList();
+        //    return objPropertyType;
+        //}
         internal GeneralMaster.PropertyType DisplayPropertyType(int currPage, int searchPid)
         {
             throw new NotImplementedException();
@@ -1515,6 +1610,24 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             throw new NotImplementedException();
         }
 
+
+
+        #endregion
+        #region Reason
+        //public GeneralMaster.Reason DisplayReason()
+        //{
+        //    GeneralMaster.Reason objReason = new GeneralMaster.Reason();
+        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("Reason").Tables[0];
+        //    objReason.listReason = (from DataRow dr in dt.Rows
+        //                      select new GeneralMaster.Reason
+        //                      {
+        //                          Pid = Convert.ToInt32(dr["Pid"]),
+        //                          ReasonName = Convert.ToString(dr["Reason"]),
+        //                          LastEdit = Convert.ToDateTime(dr["LastEdit"])
+        //                      }
+        //                       ).ToList();
+        //    return objReason;
+        //}
         internal GeneralMaster.Reason DisplayReason(int currPage, int searchPid)
         {
             throw new NotImplementedException();
@@ -1549,6 +1662,25 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         {
             throw new NotImplementedException();
         }
+
+
+        #endregion
+        #region ReportingState
+        //public GeneralMaster.ReportingState DisplayReportingState()
+        //{
+        //    GeneralMaster.ReportingState objReportingState = new GeneralMaster.ReportingState();
+        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("ReportingState").Tables[0];
+        //    objReportingState.listReportingState = (from DataRow dr in dt.Rows
+        //                              select new GeneralMaster.ReportingState
+        //                              {
+        //                                  Pid = Convert.ToInt32(dr["Pid"]),
+        //                                  Code = Convert.ToString(dr["Code"]),
+        //                                  ReportingStateName = Convert.ToString("ReportingState"),
+        //                                  LastEdit = Convert.ToDateTime(dr["LastEdit"])
+        //                              }
+        //                       ).ToList();
+        //    return objReportingState;
+        //}
 
         internal GeneralMaster.ReportingState DisplayReportingState(int currPage, int searchPid)
         {
@@ -1586,861 +1718,8 @@ namespace LetStartSomethingNew.Models.GeneralMaster
             throw new NotImplementedException();
         }
 
-        internal GeneralMaster.Season DisplaySeason(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
 
-        internal object SearchSeason(string prefix)
-        {
-            throw new NotImplementedException();
-        }
 
-        internal GeneralMaster.Season ASeason()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Season ASeason(GeneralMaster.Season model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Season ESeason(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Season ESeason(GeneralMaster.Season model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Season DSeason(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Source DisplaySource(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchSource(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Source ASource()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Source ASource(GeneralMaster.Source model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Source ESource(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Source ESource(GeneralMaster.Source model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Source DSource(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Status DisplayStatus(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchStatus(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Status AStatus()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Status AStatus(GeneralMaster.Status model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Status EStatus(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Status EStatus(GeneralMaster.Status model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Status DStatus(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Supplement DisplaySupplement(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchSupplement(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Supplement ASupplement()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Supplement ASupplement(GeneralMaster.Supplement model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Supplement ESupplement(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Supplement ESupplement(GeneralMaster.Supplement model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Supplement DSupplement(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.SupplementType DisplaySupplementType(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchSupplementType(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.SupplementType ASupplementType()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Supplement ASupplementType(GeneralMaster.SupplementType model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.SupplementType ESupplementType(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.SupplementType ESupplementType(GeneralMaster.SupplementType model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.SupplementType DSupplementType(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Tax DisplayTax(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchTax(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Tax ATax()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Tax ATax(GeneralMaster.Tax model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Tax ETax(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Tax ETax(GeneralMaster.Tax model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Tax DTax(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Title DisplayTitle(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchTitle(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Title ATitle()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Title ATitle(GeneralMaster.Title model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Title ETitle(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Title ETitle(GeneralMaster.Title model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Title DTitle(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Company DisplayCompany(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchCompany(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Company ACompany()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Company ACompany(GeneralMaster.Company model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Company ECompany(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Company ECompany(GeneralMaster.Company model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Company DCompany(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Department DisplayDepartment(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchDepartment(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Department ADepartment()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Department ADepartment(GeneralMaster.Department model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Department EDepartment(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Department EDepartment(GeneralMaster.Department model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Department DDepartment(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Designation DisplayDesignation(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchDesignation(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Designation ADesignation()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Designation ADesignation(GeneralMaster.Designation model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Designation EDesignation(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Designation EDesignation(GeneralMaster.Designation model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Designation DDesignation(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.DMCSystemConfiguration DisplayDMCSystemConfiguration(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchDMCSystemConfiguration(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.DMCSystemConfiguration ADMCSystemConfiguration()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.DMCSystemConfiguration ADMCSystemConfiguration(GeneralMaster.DMCSystemConfiguration model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.DMCSystemConfiguration EDMCSystemConfiguration(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.DMCSystemConfiguration EDMCSystemConfiguration(GeneralMaster.DMCSystemConfiguration model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.DMCSystemConfiguration DDMCSystemConfiguration(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ImageLibrary DisplayImageLibrary(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchImageLibrary(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ImageLibrary AImageLibrary()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ImageLibrary EImageLibrary(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ImageLibrary EImageLibrary(GeneralMaster.ImageLibrary model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ImageLibrary AImageLibrary(GeneralMaster.ImageLibrary model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ImageLibrary DImageLibrary(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Depot DisplayDepot(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchRDepot(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Depot ADepot()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Depot ADepot(GeneralMaster.Depot model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Depot EDepot(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Depot EDepot(GeneralMaster.Depot model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Depot DDepot(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ContractingGroup DisplayContractingGroup(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchContractingGroup(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ContractingGroup AContractingGroup()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ContractingGroup AContractingGroup(GeneralMaster.ContractingGroup model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ContractingGroup ContractingGroup(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ContractingGroup EContractingGroup(GeneralMaster.ContractingGroup model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ContractingGroup DContractingGroup(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.TblTariff DisplayTblTariff(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchTblTariff(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.TblTariff ATblTariff()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.TblTariff ATblTariff(GeneralMaster.TblTariff model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.TblTariff ETblTariff(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.TblTariff ETblTariff(GeneralMaster.TblTariff model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.TblTariff DTblTariff(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Client DisplayClient(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchClient(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Client AClient()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Client AClient(GeneralMaster.Client model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Client EClient(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Client EClient(GeneralMaster.Client model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Client DClient(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Airline DisplayAirline(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchAirline(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Airline AAirline()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Airline AAirline(GeneralMaster.Airline model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Airline EAirline(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Airline EAirline(GeneralMaster.Airline model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.Airline DAirline(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceType DisplayResourceType(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchResourceType(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceType AResourceType()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceType AResourceType(GeneralMaster.ResourceType model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceType EResourceType(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceType EResourceType(GeneralMaster.ResourceType model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceType DResourceType(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.HumanResource DisplayHumanResource(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchHumanResource(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.HumanResource AHumanResource()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.HumanResource AHumanResource(GeneralMaster.HumanResource model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.HumanResource EHumanResource(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.HumanResource EHumanResource(GeneralMaster.HumanResource model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.HumanResource DHumanResource(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceVehicleDtls DisplayResourceVehicleDtls(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchResourceVehicleDtls(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceVehicleDtls AResourceVehicleDtls()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceVehicleDtls AResourceVehicleDtls(GeneralMaster.ResourceVehicleDtls model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceVehicleDtls EResourceVehicleDtls(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceVehicleDtls EResourceVehicleDtls(GeneralMaster.ResourceVehicleDtls model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.ResourceVehicleDtls DResourceVehicleDtls(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.LogisticVehicleType DisplayLogisticVehicleType(int currPage, int searchPid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal object SearchLogisticVehicleType(string prefix)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.LogisticVehicleType ALogisticVehicleType()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.LogisticVehicleType ALogisticVehicleType(GeneralMaster.LogisticVehicleType model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.LogisticVehicleType ELogisticVehicleType(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.LogisticVehicleType ELogisticVehicleType(GeneralMaster.LogisticVehicleType model)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal GeneralMaster.LogisticVehicleType DLogisticVehicleType(int pid)
-        {
-            throw new NotImplementedException();
-        }
-
-
-
-        #endregion
-        #region PaymentSchedule
-        //public GeneralMaster.PaymentSchedules DisplayPaymentSchedules()
-        //{
-        //    GeneralMaster.PaymentSchedules objPaymentSchedules = new GeneralMaster.PaymentSchedules();
-        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("PaymentSchedules").Tables[0];
-        //    objPaymentSchedules.listPaymentSchedules = (from DataRow dr in dt.Rows
-        //                               select new GeneralMaster.PaymentSchedules
-        //                               {
-        //                                   Pid = Convert.ToInt32(dr["Pid"]),
-        //                                   PaymentSchedulesName = Convert.ToString(dr["PaymentSchedule"]),
-        //                                   LastEdit = Convert.ToDateTime(dr["LastEdit"]),
-        //                               }
-        //                       ).ToList();
-        //    return objPaymentSchedules;
-        //}
-        #endregion
-        #region paymentType
-        //public GeneralMaster.PaymentType DisplayPaymentType()
-        //{
-        //    GeneralMaster.PaymentType objPaymentType = new GeneralMaster.PaymentType();
-        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("PaymentType").Tables[0];
-        //    objPaymentType.listPaymentType = (from DataRow dr in dt.Rows
-        //                               select new GeneralMaster.PaymentType
-        //                               {
-        //                                   Pid = Convert.ToInt32(dr["Pid"]),
-        //                                   PaymentTypeName =Convert.ToString(dr["PaymentType"]),
-        //                                   NominalCode = Convert.ToString(dr["nominalCode"]),
-        //                                   LastEdit = Convert.ToDateTime(dr["LastEdit"])
-        //                               }
-        //                       ).ToList();
-        //    return objPaymentType;
-        //}
-        #endregion
-        #region Logisticpickuptype
-        //public GeneralMaster.LogisticPickupType DisplayLogisticPickupType()
-        //{
-        //    GeneralMaster.LogisticPickupType objLogisticPickupType = new GeneralMaster.LogisticPickupType();
-        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("LogisticPickupType").Tables[0];
-        //    objLogisticPickupType.listLogisticPickupType = (from DataRow dr in dt.Rows
-        //                               select new GeneralMaster.LogisticPickupType
-        //                               {
-        //                                   Pid = Convert.ToInt32(dr["Pid"]),
-        //                                   PickupType = Convert.ToString(dr["Pickuptype"]),
-        //                                   ShowBookingEngine =Convert.ToString(dr["showbookingengine"]),
-        //                                   ArrivalPoint = Convert.ToString(dr["ArrivalPOint"]),
-
-        //                                   LastEdit = Convert.ToDateTime(dr["LastEdit"])
-        //                               }
-        //                       ).ToList();
-        //    return objLogisticPickupType;
-        //}
-        #endregion
-        #region Crmpriority
-        ////Pending
-        //public GeneralMaster.CrmPriority DisplayCrmPriority()
-        //{
-        //    GeneralMaster.CrmPriority objCrmPriority = new GeneralMaster.CrmPriority();
-        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("CrmPriority").Tables[0];
-        //    objCrmPriority.listCrmPriority = (from DataRow dr in dt.Rows
-        //                           select new GeneralMaster.CrmPriority
-        //                           {
-        //                               Pid = Convert.ToInt32(dr["Pid"]),
-        //                               Priority = Convert.ToString(dr["priority"]),
-        //                               LastEdit = Convert.ToDateTime(dr["LastEdit"])
-        //                           }
-        //                       ).ToList();
-        //    return objCrmPriority;
-        //}
-        #endregion
-        #region PropertyType
-        //public GeneralMaster.PropertyType DisplayPropertyType()
-        //{
-        //    GeneralMaster.PropertyType objPropertyType = new GeneralMaster.PropertyType();
-        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("PropertyType").Tables[0];
-        //    objPropertyType.listPropertyType = (from DataRow dr in dt.Rows
-        //                            select new GeneralMaster.PropertyType
-        //                            {
-        //                                Pid = Convert.ToInt32(dr["Pid"]),
-        //                                PropertyTypeName = Convert.ToString(dr["PropertyType"]),
-        //                                LastEdit = Convert.ToDateTime(dr["LastEdit"])
-        //                            }
-        //                       ).ToList();
-        //    return objPropertyType;
-        //}
-        #endregion
-        #region Reason
-        //public GeneralMaster.Reason DisplayReason()
-        //{
-        //    GeneralMaster.Reason objReason = new GeneralMaster.Reason();
-        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("Reason").Tables[0];
-        //    objReason.listReason = (from DataRow dr in dt.Rows
-        //                      select new GeneralMaster.Reason
-        //                      {
-        //                          Pid = Convert.ToInt32(dr["Pid"]),
-        //                          ReasonName = Convert.ToString(dr["Reason"]),
-        //                          LastEdit = Convert.ToDateTime(dr["LastEdit"])
-        //                      }
-        //                       ).ToList();
-        //    return objReason;
-        //}
-        #endregion
-        #region ReportingState
-        //public GeneralMaster.ReportingState DisplayReportingState()
-        //{
-        //    GeneralMaster.ReportingState objReportingState = new GeneralMaster.ReportingState();
-        //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("ReportingState").Tables[0];
-        //    objReportingState.listReportingState = (from DataRow dr in dt.Rows
-        //                              select new GeneralMaster.ReportingState
-        //                              {
-        //                                  Pid = Convert.ToInt32(dr["Pid"]),
-        //                                  Code = Convert.ToString(dr["Code"]),
-        //                                  ReportingStateName = Convert.ToString("ReportingState"),
-        //                                  LastEdit = Convert.ToDateTime(dr["LastEdit"])
-        //                              }
-        //                       ).ToList();
-        //    return objReportingState;
-        //}
         #endregion
         #region Season
         //public GeneralMaster.Season DisplaySeason()  //MATZVM
@@ -2482,6 +1761,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                    ).ToList();
         //    return objSeason;
         //}
+        internal GeneralMaster.Season DisplaySeason(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchSeason(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Season ASeason()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Season ASeason(GeneralMaster.Season model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Season ESeason(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Season ESeason(GeneralMaster.Season model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Season DSeason(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
         #endregion
         #region Source
         //public GeneralMaster.Source DisplaySource()
@@ -2498,6 +1814,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objSource;
         //}
+        internal GeneralMaster.Source DisplaySource(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchSource(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Source ASource()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Source ASource(GeneralMaster.Source model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Source ESource(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Source ESource(GeneralMaster.Source model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Source DSource(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
         #endregion
         #region Status
         //public GeneralMaster.Status DisplayStatus()
@@ -2519,6 +1872,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objStatus;
         //}
+        internal GeneralMaster.Status DisplayStatus(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchStatus(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Status AStatus()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Status AStatus(GeneralMaster.Status model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Status EStatus(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Status EStatus(GeneralMaster.Status model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Status DStatus(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
         #endregion
         #region Supplement
         //public GeneralMaster.Supplement DisplaySupplement() //MATZVM
@@ -2553,6 +1943,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         //    return objSupplement;
         //}
+
+        internal GeneralMaster.Supplement DisplaySupplement(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchSupplement(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Supplement ASupplement()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Supplement ASupplement(GeneralMaster.Supplement model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Supplement ESupplement(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Supplement ESupplement(GeneralMaster.Supplement model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Supplement DSupplement(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region SupplementType
         //public GeneralMaster.SupplementType DisplaySupplementType()
@@ -2570,6 +1997,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objSupplementType;
         //}
+        internal GeneralMaster.SupplementType DisplaySupplementType(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchSupplementType(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.SupplementType ASupplementType()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Supplement ASupplementType(GeneralMaster.SupplementType model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.SupplementType ESupplementType(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.SupplementType ESupplementType(GeneralMaster.SupplementType model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.SupplementType DSupplementType(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
         #endregion
         #region Tax
         //public GeneralMaster.Tax DisplayTax()
@@ -2588,6 +2052,44 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objTax;
         //}
+
+        internal GeneralMaster.Tax DisplayTax(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchTax(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Tax ATax()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Tax ATax(GeneralMaster.Tax model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Tax ETax(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Tax ETax(GeneralMaster.Tax model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Tax DTax(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
         #endregion
         #region Title
         //public GeneralMaster.Title DisplayTitle()
@@ -2605,6 +2107,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objTitle;
         //}
+        internal GeneralMaster.Title DisplayTitle(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchTitle(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Title ATitle()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Title ATitle(GeneralMaster.Title model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Title ETitle(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Title ETitle(GeneralMaster.Title model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Title DTitle(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
         #endregion
         #region Company
         //public GeneralMaster.Company DisplayCompany() //MATZVM
@@ -2636,6 +2175,41 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objCompany;
         //}
+        internal GeneralMaster.Company DisplayCompany(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchCompany(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Company ACompany()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Company ACompany(GeneralMaster.Company model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Company ECompany(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Company ECompany(GeneralMaster.Company model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Company DCompany(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
 
         #endregion
         #region Department
@@ -2654,6 +2228,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objDepartment;
         //}
+
+        internal GeneralMaster.Department DisplayDepartment(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchDepartment(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Department ADepartment()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Department ADepartment(GeneralMaster.Department model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Department EDepartment(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Department EDepartment(GeneralMaster.Department model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Department DDepartment(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region Designation
         //public GeneralMaster.Designation DisplayDesignation()
@@ -2671,6 +2282,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objDesignation;
         //}
+
+        internal GeneralMaster.Designation DisplayDesignation(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchDesignation(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Designation ADesignation()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Designation ADesignation(GeneralMaster.Designation model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Designation EDesignation(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Designation EDesignation(GeneralMaster.Designation model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Designation DDesignation(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region DMCConfiguration
         //public GeneralMaster.DMCSystemConfiguration DisplayDMCSystemConfiguration()
@@ -2695,6 +2343,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objDMCSystemConfiguration;
         //}
+        internal GeneralMaster.DMCSystemConfiguration DisplayDMCSystemConfiguration(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchDMCSystemConfiguration(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.DMCSystemConfiguration ADMCSystemConfiguration()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.DMCSystemConfiguration ADMCSystemConfiguration(GeneralMaster.DMCSystemConfiguration model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.DMCSystemConfiguration EDMCSystemConfiguration(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.DMCSystemConfiguration EDMCSystemConfiguration(GeneralMaster.DMCSystemConfiguration model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.DMCSystemConfiguration DDMCSystemConfiguration(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
         #endregion
         #region ImageLibrary
         //public GeneralMaster.ImageLibrary DisplayImageLibrary() //MATZVM
@@ -2721,6 +2406,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         //    return objImageLibrary;
         //}
+
+        internal GeneralMaster.ImageLibrary DisplayImageLibrary(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchImageLibrary(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ImageLibrary AImageLibrary()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ImageLibrary EImageLibrary(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ImageLibrary EImageLibrary(GeneralMaster.ImageLibrary model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ImageLibrary AImageLibrary(GeneralMaster.ImageLibrary model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ImageLibrary DImageLibrary(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region Depot
         //public GeneralMaster.Depot DisplayDepot() //MATZVM
@@ -2749,6 +2471,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objDepot;
         //}
+
+        internal GeneralMaster.Depot DisplayDepot(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchRDepot(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Depot ADepot()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Depot ADepot(GeneralMaster.Depot model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Depot EDepot(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Depot EDepot(GeneralMaster.Depot model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Depot DDepot(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region ContractingGroup
         //public GeneralMaster.ContractingGroup DisplayContractingGroup()
@@ -2768,6 +2527,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objContractingGroup;
         //}
+
+        internal GeneralMaster.ContractingGroup DisplayContractingGroup(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchContractingGroup(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ContractingGroup AContractingGroup()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ContractingGroup AContractingGroup(GeneralMaster.ContractingGroup model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ContractingGroup ContractingGroup(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ContractingGroup EContractingGroup(GeneralMaster.ContractingGroup model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ContractingGroup DContractingGroup(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region TblTariff
         //public GeneralMaster.TblTariff DisplayTblTariff()
@@ -2785,6 +2581,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objTblTariff;
         //}
+
+        internal GeneralMaster.TblTariff DisplayTblTariff(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchTblTariff(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariff ATblTariff()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariff ATblTariff(GeneralMaster.TblTariff model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariff ETblTariff(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariff ETblTariff(GeneralMaster.TblTariff model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariff DTblTariff(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region TblTariffMarkets
         //public GeneralMaster.TblTariffMarkets DisplayTblTariffMarkets() //MATZVM
@@ -2811,6 +2644,42 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objTblTariffMarkets;
         //}
+        internal GeneralMaster.TblTariffMarkets DisplayTblTariffMarkets(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchTblTariffMarkets(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariffMarkets ATblTariffMarkets()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariffMarkets ATblTariffMarkets(GeneralMaster.TblTariffMarkets model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariffMarkets ETblTariffMarkets(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariffMarkets ETblTariffMarkets(GeneralMaster.TblTariffMarkets model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.TblTariffMarkets DTblTariffMarkets(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region Client
         //public GeneralMaster.Client DisplayClient() //MATZVM
@@ -2842,6 +2711,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objCLient;
         //}
+        internal GeneralMaster.Client DisplayClient(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchClient(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Client AClient()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Client AClient(GeneralMaster.Client model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Client EClient(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Client EClient(GeneralMaster.Client model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Client DClient(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+       
+
         #endregion
         #region Airline
         //public GeneralMaster.Airline DisplayAirline()
@@ -2858,6 +2764,42 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objAirline;
         //}
+        internal GeneralMaster.Airline DisplayAirline(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchAirline(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Airline AAirline()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Airline AAirline(GeneralMaster.Airline model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Airline EAirline(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Airline EAirline(GeneralMaster.Airline model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.Airline DAirline(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region ResourceType
         //public GeneralMaster.ResourceType DisplayResourceType()
@@ -2875,6 +2817,43 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //                       ).ToList();
         //    return objResourceType;
         //}
+
+        internal GeneralMaster.ResourceType DisplayResourceType(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchResourceType(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceType AResourceType()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceType AResourceType(GeneralMaster.ResourceType model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceType EResourceType(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceType EResourceType(GeneralMaster.ResourceType model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceType DResourceType(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
         #region HumanResource
         //public GeneralMaster.HumanResource DisplayHumanResource() //MATZVM
@@ -2909,6 +2888,41 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         //    return objHumanRsr;
         //}
+
+        internal GeneralMaster.HumanResource DisplayHumanResource(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchHumanResource(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.HumanResource AHumanResource()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.HumanResource AHumanResource(GeneralMaster.HumanResource model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.HumanResource EHumanResource(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.HumanResource EHumanResource(GeneralMaster.HumanResource model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.HumanResource DHumanResource(int pid)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
         #region ResourcevehicleType
         //public GeneralMaster.ResourceVehicleDtls DisplayResourceVehicleDtls() //MATZVM
@@ -2940,6 +2954,45 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objResourceVehicleDtls;
         //}
+
+        internal GeneralMaster.ResourceVehicleDtls DisplayResourceVehicleDtls(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchResourceVehicleDtls(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceVehicleDtls AResourceVehicleDtls()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceVehicleDtls AResourceVehicleDtls(GeneralMaster.ResourceVehicleDtls model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceVehicleDtls EResourceVehicleDtls(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceVehicleDtls EResourceVehicleDtls(GeneralMaster.ResourceVehicleDtls model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.ResourceVehicleDtls DResourceVehicleDtls(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
         #endregion
         #region LogisticvehicleType
         //public GeneralMaster.LogisticVehicleType DisplayLogisticVehicleType() //MATZVM
@@ -2966,6 +3019,44 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objLogisticVehicleType;
         //}
+        internal GeneralMaster.LogisticVehicleType DisplayLogisticVehicleType(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchLogisticVehicleType(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticVehicleType ALogisticVehicleType()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticVehicleType ALogisticVehicleType(GeneralMaster.LogisticVehicleType model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticVehicleType ELogisticVehicleType(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticVehicleType ELogisticVehicleType(GeneralMaster.LogisticVehicleType model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticVehicleType DLogisticVehicleType(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
         #endregion
         #region Logisticpickuparea
         //public GeneralMaster.LogisticPickupArea DisplayLogisticPickupArea() //MATZVM
@@ -2990,6 +3081,42 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objLogisticPickupArea;
         //}
+
+        internal GeneralMaster.LogisticPickupArea DisplayLogisticPickupArea(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchLogisticPickupArea(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticPickupArea ALogisticPickupArea()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticPickupArea ALogisticPickupArea(GeneralMaster.LogisticPickupArea model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticPickupArea ELogisticPickupArea(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticPickupArea ELogisticPickupArea(GeneralMaster.LogisticPickupArea model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticPickupArea DLogisticPickupArea(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
         #region LogisticJourneytimes
         //public GeneralMaster.LogisticJourneyTimes DisplayLogisticJourneyTimes() //MATZVM
@@ -3013,6 +3140,41 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //    //                ).ToList();
         //    return objLogisticJourneyTimes;
         //}
+        internal GeneralMaster.LogisticJourneyTimes DisplayLogisticJourneyTimes(int currPage, int searchPid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal object SearchLogisticJourneyTimes(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticJourneyTimes ALogisticJourneyTimes()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticJourneyTimes ALogisticJourneyTimes(GeneralMaster.LogisticJourneyTimes model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticJourneyTimes ELogisticJourneyTimes(int pid)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticJourneyTimes ELogisticJourneyTimes(GeneralMaster.LogisticJourneyTimes model)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal GeneralMaster.LogisticJourneyTimes DLogisticJourneyTimes(int pid)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
         //public List<GeneralMaster.VM_Airport> DisplayAirport()
         //{
         //    DataTable dt = objBaseDataLayer.getDALGeneralMaster("Airport").Tables[0];
@@ -3133,6 +3295,6 @@ namespace LetStartSomethingNew.Models.GeneralMaster
         //         return false;
         //    }
         //}
-        #endregion
+
     }
 }

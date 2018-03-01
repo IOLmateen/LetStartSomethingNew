@@ -1193,7 +1193,7 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
 
         //GET DeeleteDISCOUNT
         [HttpGet]
-        public ActionResult CardType(int pid)
+        public ActionResult DeleteCardType(int pid)
         {
             this.DCardType(pid);
             return RedirectToAction("DisplayCardType");
@@ -6035,6 +6035,143 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
             return t.DTblTariff(pid);
         }
         #endregion
+
+
+        #region TblTariffMarkets
+
+        [ValidateAntiForgeryTokenWrapper(HttpVerbs.Post)]
+        public ActionResult DisplayTblTariffMarkets()
+        {
+            if (Request.HttpMethod == "POST")
+            {
+                int CurrPage = 0;
+                int SearchPid = 0;
+                if (ModelState.IsValid)
+                {
+                    CurrPage = Convert.ToInt32(Request["currentPageIndex"]);
+                    SearchPid = Convert.ToInt32(Request["Pid"]);
+                }
+                else
+                {
+                    ModelState.AddModelError("Currpage", "Please check Currpage");
+                    ModelState.AddModelError("SearchPid", "Please check SearchPid");
+                }
+                return View(this.TblTariffMarkets(CurrPage, SearchPid));
+            }
+            else if (Request.HttpMethod == "GET")
+            {
+                return View(this.TblTariffMarkets(1, 0));
+            }
+            return View("Error");
+            ////    GeneralMaster.TblTariff objTblTariff = new GeneralMaster.TblTariff();
+            //TestClass t = new TestClass();
+            ////    objTblTariff.listTblTariff = t.DisplayTblTariff();
+            //return View(t.DisplayTblTariff());
+        }
+        private GeneralMaster.TblTariffMarkets TblTariffMarkets(int currPage, int SearchPid)
+        {
+            TestClass t = new TestClass();
+            return t.DisplayTblTariffMarkets(currPage, SearchPid);
+        }
+
+        [HttpPost]
+        public JsonResult SearchTblTariffMarketsByString(string prefix)
+        {
+            TestClass t = new TestClass();
+            return Json(t.SearchTblTariffMarkets(prefix), JsonRequestBehavior.AllowGet);
+        }
+
+        //GET ADDDISCOUNT
+        [HttpGet]
+        public ActionResult AddTblTariffMarkets()
+        {
+            return View(this.ATblTariffMarkets());
+        }
+        //GET ADDDISCOUNT
+        private GeneralMaster.TblTariffMarkets ATblTariffMarkets()
+        {
+            TestClass t = new TestClass();
+            return t.ATblTariffMarkets();
+        }
+
+        //POST ADDDISCOUNT
+        [HttpPost]
+        public ActionResult AddTblTariffMarkets(GeneralMaster.TblTariffMarkets model)
+        {
+            if (!ModelState.IsValid)
+            {
+                //ModelState.AddModelError("DiscountName", "Please check DiscountName");
+                //ModelState.AddModelError("Sequence", "Please check Sequence");
+                //ModelState.AddModelError("Description", "Please check Description");
+            }
+            else
+            {
+                this.ATblTariffMarkets(model);
+                return RedirectToAction("DisplayTblTariffMarkets");
+            }
+            return View("Error");
+        }
+        //POST ADDDISCOUNT
+        private GeneralMaster.TblTariffMarkets ATblTariffMarkets(GeneralMaster.TblTariffMarkets model)
+        {
+            TestClass t = new TestClass();
+            return t.ATblTariffMarkets(model);
+        }
+
+
+        //GET EDITDISCOUNT
+        [HttpGet]
+        public ActionResult EditTblTariffMarkets(int pid)
+        {
+            return View(this.ETblTariffMarkets(pid));
+        }
+        //GET EDITDISCOUNT
+        private GeneralMaster.TblTariffMarkets ETblTariffMarkets(int pid)
+        {
+            TestClass t = new TestClass();
+            return t.ETblTariffMarkets(pid);
+        }
+
+
+        ////POST EDITDISCOUNT
+        [HttpPost]
+        public ActionResult EditTblTariffMarkets(GeneralMaster.TblTariffMarkets model)
+        {
+            if (!ModelState.IsValid)
+            {
+                //ModelState.AddModelError("DiscountName", "Please check DiscountName");
+                //ModelState.AddModelError("Sequence", "Please check Sequence");
+                //ModelState.AddModelError("Description", "Please check Description");
+            }
+            else
+            {
+                this.ETblTariffMarkets(model);
+                return RedirectToAction("DisplayTblTariffMarkets");
+            }
+            return View("Error");
+        }
+        //POst EDITDISCOUNT
+        private GeneralMaster.TblTariffMarkets ETblTariffMarkets(GeneralMaster.TblTariffMarkets model)
+        {
+            TestClass t = new TestClass();
+            return t.ETblTariffMarkets(model);
+        }
+
+        //GET DeeleteDISCOUNT
+        [HttpGet]
+        public ActionResult DeleteTblTariffMarkets(int pid)
+        {
+            this.DTblTariffMarkets(pid);
+            return RedirectToAction("DisplayTblTariffMarkets");
+        }
+        //GET DeeleteDISCOUNT
+        private GeneralMaster.TblTariffMarkets DTblTariffMarkets(int pid)
+        {
+            TestClass t = new TestClass();
+            return t.DTblTariffMarkets(pid);
+        }
+        #endregion
+
 
         #region Client
         [ValidateAntiForgeryTokenWrapper(HttpVerbs.Post)]
