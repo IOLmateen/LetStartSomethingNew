@@ -341,31 +341,31 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         }
 
-        public class VM_Airport
-        {
-            //Added Extra
-            public string CountryName { get; set; }
-            public string CityName { get; set; }
+        //public class VM_Airport
+        //{
+        //    //Added Extra
+        //    public string CountryName { get; set; }
+        //    public string CityName { get; set; }
 
-            public Airport Airport_Values { get; set; }
-            public VM_Airport()
-            {
-                Airport_Values = new Airport();
-            }
+        //    public Airport Airport_Values { get; set; }
+        //    public VM_Airport()
+        //    {
+        //        Airport_Values = new Airport();
+        //    }
 
-            public VM_Airport(int pid, string code, string airport, string country, string city, DateTime lastedit)
-            {
-                Airport_Values = new Airport();
-                this.Airport_Values.Pid = pid;
-                this.Airport_Values.Code = code;
-                this.Airport_Values.AirportName = airport;
-                this.Airport_Values.LastEdit = lastedit;
+        //    public VM_Airport(int pid, string code, string airport, string country, string city, DateTime lastedit)
+        //    {
+        //        Airport_Values = new Airport();
+        //        this.Airport_Values.Pid = pid;
+        //        this.Airport_Values.Code = code;
+        //        this.Airport_Values.AirportName = airport;
+        //        this.Airport_Values.LastEdit = lastedit;
 
-                this.CountryName = country;
-                this.CityName = city;
-            }
-            public List<VM_Airport> listVMAirport { get; set; }
-        }
+        //        this.CountryName = country;
+        //        this.CityName = city;
+        //    }
+        //    public List<VM_Airport> listVMAirport { get; set; }
+        //}
 
 
         public class Country
@@ -1033,36 +1033,36 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         }
 
-        public class Season
-        {
-            public int Pid { get; set; }
-            public string Code { get; set; }
-            public string SeasonName { get; set; }
-            public Nullable<DateTime> FromDate { get; set; }
-            public int FinancialYearXid { get; set; }
-            public Nullable<DateTime> ToDate { get; set; }
+        //public class Season
+        //{
+        //    public int Pid { get; set; }
+        //    public string Code { get; set; }
+        //    public string SeasonName { get; set; }
+        //    public Nullable<DateTime> FromDate { get; set; }
+        //    public int FinancialYearXid { get; set; }
+        //    public Nullable<DateTime> ToDate { get; set; }
 
-            public Nullable<int> NotesXid { get; set; }
-            public DateTime LastEdit { get; set; }
-            public int LastEditByXid { get; set; }
-            public int CompanyXid { get; set; }
+        //    public Nullable<int> NotesXid { get; set; }
+        //    public DateTime LastEdit { get; set; }
+        //    public int LastEditByXid { get; set; }
+        //    public int CompanyXid { get; set; }
 
-            public Season()
-            {
-            }
-            public VM_Season SeasonValues { get; set; }
-            public Season(VM_Season PassSeasonValues)
-            {
-                this.SeasonValues = PassSeasonValues;
-            }
-            public List<Season> listSeason { get; set; }
-        }
+        //    public Season()
+        //    {
+        //    }
+        //    public VM_Season SeasonValues { get; set; }
+        //    public Season(VM_Season PassSeasonValues)
+        //    {
+        //        this.SeasonValues = PassSeasonValues;
+        //    }
+        //    public List<Season> listSeason { get; set; }
+        //}
 
-        public class VM_Season
-            {
-            public string FinancialYear { get; set; }
-            public List<VM_Season> listVMSeason { get; set; }
-            }
+        //public class VM_Season
+        //    {
+        //    public string FinancialYear { get; set; }
+        //    public List<VM_Season> listVMSeason { get; set; }
+        //    }
 
 
 
@@ -1781,57 +1781,57 @@ namespace LetStartSomethingNew.Models.GeneralMaster
 
         }
 
-        public class HumanResource
-        {
-            public int Pid { get; set; }
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-            public string Id { get; set; }
-            public string Category { get; set; }
-            public string Address { get; set; }
-            public string TelNo { get; set; }
-            public string MobileNo { get; set; }
-            public string Email { get; set; }
-            public string FaxNo { get; set; }
-            public string PassportNo { get; set; }
-            public string AvailableYN { get; set; }
-            public string Status { get; set; }
-            public string PassNo { get; set; }
-            public string Rate { get; set; }
+        //public class HumanResource
+        //{
+        //    public int Pid { get; set; }
+        //    public string FirstName { get; set; }
+        //    public string LastName { get; set; }
+        //    public string Id { get; set; }
+        //    public string Category { get; set; }
+        //    public string Address { get; set; }
+        //    public string TelNo { get; set; }
+        //    public string MobileNo { get; set; }
+        //    public string Email { get; set; }
+        //    public string FaxNo { get; set; }
+        //    public string PassportNo { get; set; }
+        //    public string AvailableYN { get; set; }
+        //    public string Status { get; set; }
+        //    public string PassNo { get; set; }
+        //    public string Rate { get; set; }
 
-            public Nullable<DateTime> Doj { get; set; }
-            public Nullable<DateTime> Dob { get; set; }
-            public Nullable<DateTime> VisaExpiryDate { get; set; }
-            public Nullable<DateTime> PassValidityPeriod { get; set; }
+        //    public Nullable<DateTime> Doj { get; set; }
+        //    public Nullable<DateTime> Dob { get; set; }
+        //    public Nullable<DateTime> VisaExpiryDate { get; set; }
+        //    public Nullable<DateTime> PassValidityPeriod { get; set; }
 
-            public Nullable<int> ResourceTypeXid { get; set; }
-            public Nullable<int> DesignationXid { get; set; }
-            public Nullable<int> LanguageDtlXid { get; set; }
-            public Nullable<int> SupplierXid { get; set; }
+        //    public Nullable<int> ResourceTypeXid { get; set; }
+        //    public Nullable<int> DesignationXid { get; set; }
+        //    public Nullable<int> LanguageDtlXid { get; set; }
+        //    public Nullable<int> SupplierXid { get; set; }
 
-            public DateTime LastEdit { get; set; }
-            public int LastEditByXid { get; set; }
-            public int CompanyXid { get; set; }
+        //    public DateTime LastEdit { get; set; }
+        //    public int LastEditByXid { get; set; }
+        //    public int CompanyXid { get; set; }
 
-            public HumanResource()
-            {
-            }
+        //    public HumanResource()
+        //    {
+        //    }
 
-            public VM_HumanResource HumanResourceValues { get; set; }
-            public HumanResource(VM_HumanResource PassHumanResourceValues)
-            {
-                this.HumanResourceValues = PassHumanResourceValues;
-            }
-            public List<HumanResource> listHumanResource { get; set; }
-        }
+        //    public VM_HumanResource HumanResourceValues { get; set; }
+        //    public HumanResource(VM_HumanResource PassHumanResourceValues)
+        //    {
+        //        this.HumanResourceValues = PassHumanResourceValues;
+        //    }
+        //    public List<HumanResource> listHumanResource { get; set; }
+        //}
 
-        public class VM_HumanResource
-        {
-            public string ResourceTypeName { get; set; }
-            public string DesignationName { get; set; }
+        //public class VM_HumanResource
+        //{
+        //    public string ResourceTypeName { get; set; }
+        //    public string DesignationName { get; set; }
 
-            public List<VM_HumanResource> listVMHumanResource { get; set; }
-        }
+        //    public List<VM_HumanResource> listVMHumanResource { get; set; }
+        //}
 
 
 

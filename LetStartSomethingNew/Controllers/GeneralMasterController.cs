@@ -3914,7 +3914,7 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
             }
             return View("Error");
             //    GeneralMaster.ReportingState objReportingState = new GeneralMaster.ReportingState();
-            TestClass t = new TestClass();
+            //TestClass t = new TestClass();
             //    objReportingState.listReportingState = t.DisplayReportingState();
             //return View(t.DisplayReportingState());
         }
@@ -4631,7 +4631,7 @@ public class ValidateAntiForgeryTokenWrapperAttribute : FilterAttribute, IAuthor
             return View("Error");
         }
         //POST ADDDISCOUNT
-        private GeneralMaster.Supplement ASupplementType(GeneralMaster.SupplementType model)
+        private GeneralMaster.SupplementType ASupplementType(GeneralMaster.SupplementType model)
         {
             TestClass t = new TestClass();
             return t.ASupplementType(model);
